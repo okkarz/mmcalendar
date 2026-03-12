@@ -1,0 +1,12 @@
+{
+  "appId": "com.goetecx.mmcalendar",
+  "appName": "Myanmar Calendar",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#99c1de"
+  }
+}

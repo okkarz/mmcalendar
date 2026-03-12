@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myanmar Calendar - မြန်မာပြက္ခဒိန်</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Apply saved theme before first paint to avoid flash
+        (function(){
+            const t = localStorage.getItem('mm-theme');
+            if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header class="no-print">
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-btn" title="Toggle dark / light mode" aria-label="Toggle dark mode">
+                    <span class="theme-icon-light">☀️</span>
+                    <span class="theme-icon-dark">🌙</span>
+                </button>
+                <button id="printBtn" class="print-btn" title="Print / Save as PDF">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                </button>
+            </div>
+            <h1>Myanmar Calendar</h1>
+            <p class="subtitle">မြန်မာပြက္ခဒိန်</p>
+        </header>
+
+        <div class="controls">
+            <button id="prevMonth">&#8592; Prev</button>
+            <div class="current-date" id="currentDateBtn" title="Click to select month &amp; year" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
+                <h2 id="currentMonth"></h2>
+                <p id="myanmarDate"></p>
+                <span class="picker-chevron" aria-hidden="true">&#9660;</span>
+                <!-- Month / Year picker popover -->
+                <div class="month-picker" id="monthPicker" role="dialog" aria-label="Select month and year">
+                    <div class="picker-year-row">
+                        <button class="picker-year-btn" id="pickerPrevYear" aria-label="Previous year">&#8249;</button>
+                        <span class="picker-year-label" id="pickerYear"></span>
+                        <button class="picker-year-btn" id="pickerNextYear" aria-label="Next year">&#8250;</button>
+                    </div>
+                    <div class="picker-months-grid" id="pickerMonthsGrid"></div>
+                    <button class="picker-today-btn" id="pickerToday">&#x2318; Today</button>
+                </div>
+            </div>
+            <button id="nextMonth">Next &#8594;</button>
+        </div>
+
+        <div class="calendar-wrapper">
+            <!-- Print-only title — hidden on screen, shown when printing -->
+            <div class="print-header" id="printHeader">
+                <div class="print-header-left">
+                    <div class="print-title-en" id="printTitleEN"></div>
+                    <div class="print-title-mm" id="printTitleMM"></div>
+                </div>
+                <div class="print-header-right">
+                    <div class="print-app-name">Myanmar Calendar &nbsp;|&nbsp; မြန်မာပြက္ခဒိန်</div>
+                </div>
+            </div>
+            <div class="weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div class="calendar-days" id="calendarDays"></div>
+        </div>
+
+        <!-- Legend visible ONLY when printing -->
+        <div class="print-legend">
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#99c1de;"></span>Today</span>
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#fde2e4;border:1px solid #fad2e1;"></span>Holiday</span>
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#c5dedd;border:1px solid #dbe7e4;"></span>Full Moon</span>
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#dbe7e4;border:1px solid #c5dedd;"></span>Auspicious</span>
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#f0efeb;border:1px solid #fad2e1;"></span>Yatyaza</span>
+            <span class="print-legend-item"><span class="print-legend-dot" style="background:#f0efeb;border:1px solid #eddcd2;"></span>Pyathada</span>
+        </div>
+
+        <div class="legend no-print">
+            <span class="legend-item"><span class="legend-dot" style="background:#99c1de;"></span>Today</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#fde2e4;border:1.5px solid #fad2e1;"></span>Holiday</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c5dedd;border:1.5px solid #dbe7e4;"></span>Full Moon</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#dbe7e4;border:1.5px solid #c5dedd;"></span>Auspicious</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f0efeb;border:1.5px solid #fad2e1;"></span>Yatyaza</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f0efeb;border:1.5px solid #eddcd2;"></span>Pyathada</span>
+        </div>
+
+        <div class="holidays-section no-print">
+            <h3>Public Holidays</h3>
+            <div id="holidaysList"></div>
+        </div>
+
+    </div>
+
+    <!-- Day Info Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-panel" id="infoPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h3 id="modalTitle">Day Information</h3>
+                <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" id="dayInfo"></div>
+        </div>
+    </div>
+
+    <script src="mmcal.js"></script>
+    <script src="holidays.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
