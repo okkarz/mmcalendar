@@ -5,6 +5,9 @@ let myanmarHolidays = { fixed: [], byYear: {} };
 
 // Promise that resolves once the JSON is loaded.
 // app.js awaits this before first render.
+// The Service Worker intercepts this fetch:
+//   • Online  → fetches from network, caches in DATA_CACHE
+//   • Offline → serves from DATA_CACHE (or empty fallback if never cached)
 const holidaysReady = fetch('holidays.json')
     .then(r => {
         if (!r.ok) throw new Error('Could not load holidays.json: ' + r.status);
@@ -17,8 +20,27 @@ const holidaysReady = fetch('holidays.json')
         console.warn('Holiday data unavailable:', err.message);
     });
 
+// ── Hot-reload holidays data (called when back online or SW signals update) ──
+// Fetches the latest holidays.json (SW serves from its DATA_CACHE which was
+// already refreshed), replaces the in-memory data, and returns true if the
+// data actually changed so the caller can decide whether to re-render.
+async function reloadHolidays() {
+    try {
+        const r = await fetch('holidays.json');
+        if (!r.ok) return false;
+        const data = await r.json();
+        // Quick structural diff — stringify is accurate enough for this payload
+        if (JSON.stringify(data) !== JSON.stringify(myanmarHolidays)) {
+            myanmarHolidays = data;
+            return true;   // data changed
+        }
+        return false;      // no change
+    } catch {
+        return false;
+    }
+}
 
-// ── Lookup helpers (unchanged API — no edits needed in app.js) ────────────────
+
 
 function getHolidayInfo(year, month, day) {
     const holidays = [];

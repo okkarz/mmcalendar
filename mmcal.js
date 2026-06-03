@@ -219,11 +219,28 @@ class MyanmarCalendar {
         return months[mm] || "";
     }
 
+    getMonthNameEN(mm) {
+        const months = [
+            "First Waso", "Tagu", "Kason", "Nayon", "Waso",
+            "Wagaung", "Tawthalin", "Thadingyut", "Tazaungmon",
+            "Nadaw", "Pyatho", "Tabodwe", "Tabaung",
+            "Late Tagu", "Late Kason"
+        ];
+        return months[mm] || "";
+    }
+
     // Get Moon Phase in Myanmar
     getMoonPhaseMM(md, mm, myt) {
         const mml = this.getMonthLength(mm, myt);
         const mp = Math.floor((md + 1) / 16) + Math.floor(md / 16) + Math.floor(md / mml);
         const phases = ["လဆန်း", "လပြည့်", "လဆုတ်", "လကွယ်"];
+        return phases[mp];
+    }
+
+    getMoonPhaseEN(md, mm, myt) {
+        const mml = this.getMonthLength(mm, myt);
+        const mp = Math.floor((md + 1) / 16) + Math.floor(md / 16) + Math.floor(md / mml);
+        const phases = ["Waxing", "Full Moon", "Waning", "New Moon"];
         return phases[mp];
     }
 
@@ -271,7 +288,12 @@ class MyanmarCalendar {
 
     // Get Mahabote name in Myanmar
     getMahaboteMM(value) {
-        const names = ["ဘင်္ဂ", "အထွန်း", "ရာဇ", "အဓိပတိ", "မရဏ", "သိုက်", "ပုတိ"];
+        const names = ["ဘင်္ဂ ဖွား", "အထွန်း ဖွား", "ရာဇ ဖွား", "အဓိပတိ ဖွား", "မရဏ ဖွား", "သိုက် ဖွား", "ပုတိ ဖွား"];
+        return names[value];
+    }
+
+    getMahaboteEN(value) {
+        const names = ["Binga", "Atun", "Yaza", "Adipati", "Marana", "Thike", "Puti"];
         return names[value];
     }
 
@@ -288,6 +310,11 @@ class MyanmarCalendar {
         return names[value];
     }
 
+    getNakhatEN(value) {
+        const names = ["Ogre", "Elf", "Human"];
+        return names[value];
+    }
+
     // Calculate Nagahle (နဂါးခေါင်း) - Naga head direction
     // input: mm = month [0-14]
     // output: 0=West, 1=North, 2=East, 3=South
@@ -299,7 +326,12 @@ class MyanmarCalendar {
 
     // Get Nagahle direction in Myanmar
     getNagahleMM(value) {
-        const directions = ["အနောက်", "မြောက်", "အရှေ့", "တောင်"];
+        const directions = ["အနောက်ဘက်ပြု", "မြောက်ဘက်ပြု", "အရှေ့ဘက်ပြု", "တောင်ဘက်ပြု"];
+        return directions[value];
+    }
+
+    getNagahleEN(value) {
+        const directions = ["West", "North", "East", "South"];
         return directions[value];
     }
 
@@ -343,6 +375,15 @@ class MyanmarCalendar {
             "Asvini (အာသိန်နှစ်)",
             "Krittika (ကြတိုက်နှစ်)",
             "Mrigasiras (မြိက္ကသိုဝ်နှစ် / မိဂသီနှစ်)"
+        ];
+        return names[value];
+    }
+
+    getYearNameEN(value) {
+        const names = [
+            "Pushya", "Magha", "Phalguni", "Chitra", "Visakha",
+            "Jyeshtha", "Ashadha", "Sravana", "Bhadrapada",
+            "Asvini", "Krittika", "Mrigasiras"
         ];
         return names[value];
     }

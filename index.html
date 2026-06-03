@@ -4,121 +4,248 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myanmar Calendar - မြန်မာပြက္ခဒိန်</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f2f2f7" id="metaThemeColor">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MM Calendar">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="MM Calendar">
+    <meta name="description" content="Myanmar Calendar with public holidays, moon phases and astrology">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script>
-        // Apply saved theme before first paint to avoid flash
         (function(){
             const t = localStorage.getItem('mm-theme');
-            if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+            const v = localStorage.getItem('mm-view') || 'month';
+            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-view', v);
+            const lang = localStorage.getItem('mm-lang') || 'en';
+            document.documentElement.setAttribute('data-lang', lang);
         })();
     </script>
 </head>
 <body>
-    <div class="container">
-        <header class="no-print">
-            <div class="header-actions">
-                <button id="themeToggle" class="theme-btn" title="Toggle dark / light mode" aria-label="Toggle dark mode">
-                    <span class="theme-icon-light">☀️</span>
-                    <span class="theme-icon-dark">🌙</span>
+
+<!-- Liquid Glass ambient blobs -->
+<div class="lg-bg" aria-hidden="true">
+    <div class="lg-blob lg-blob-1"></div>
+    <div class="lg-blob lg-blob-2"></div>
+    <div class="lg-blob lg-blob-3"></div>
+</div>
+
+<div class="app">
+
+    <!-- ── Nav Bar ── -->
+    <header class="nav-bar">
+        <div class="nav-leading">
+            <button id="prevMonth" class="nav-arrow-btn" aria-label="Previous month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button id="todayBtn" class="nav-today-btn" aria-label="Go to today">
+                <span class="t-en">Today</span><span class="t-mm">ယနေ့</span>
+            </button>
+        </div>
+
+        <div class="nav-title-area">
+            <button class="nav-title-btn" id="headerTitleBlock" aria-haspopup="true" aria-expanded="false" aria-label="Pick month">
+                <div class="nav-title-main">
+                    <span class="nav-month" id="headerMonth"></span>
+                    <span class="nav-year" id="headerYear"></span>
+                    <svg class="nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-subtitle" id="headerMmMonth"></div>
+            </button>
+        </div>
+
+        <div class="nav-trailing">
+            <div class="nav-controls-group">
+                <button id="themeToggle" class="ctrl-btn" aria-label="Toggle theme">
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 </button>
-                <button id="printBtn" class="print-btn" title="Print / Save as PDF">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 6 2 18 2 18 9"/>
-                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                        <rect x="6" y="14" width="12" height="8"/>
-                    </svg>
+                <div class="ctrl-divider" aria-hidden="true"></div>
+                <div class="lang-seg" role="radiogroup" aria-label="Language">
+                    <button class="lang-seg-btn" data-lang="en" aria-pressed="true">EN</button>
+                    <button class="lang-seg-btn" data-lang="mm" aria-pressed="false">မြ</button>
+                </div>
+            </div>
+            <button id="nextMonth" class="nav-arrow-btn" aria-label="Next month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- ── Month Picker Popover (position:fixed, zero layout height) ── -->
+    <div class="picker-popover" id="pickerPanel" aria-hidden="true">
+        <div class="picker-inner">
+            <div class="picker-year-row">
+                <button id="pickerPrevYear" class="picker-year-btn" aria-label="Previous year">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span id="pickerYearLabel" class="picker-year-label"></span>
+                <button id="pickerNextYear" class="picker-year-btn" aria-label="Next year">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
             </div>
-            <h1>Myanmar Calendar</h1>
-            <p class="subtitle">မြန်မာပြက္ခဒိန်</p>
-        </header>
+            <div class="picker-months" id="pickerMonthsGrid"></div>
+            <div class="picker-footer">
+                <button id="pickerToday" class="picker-today-btn">
+                    <span class="t-en">Today</span><span class="t-mm">ယနေ့</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <div class="controls">
-            <button id="prevMonth">&#8592; Prev</button>
-            <div class="current-date" id="currentDateBtn" title="Click to select month &amp; year" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
-                <h2 id="currentMonth"></h2>
-                <p id="myanmarDate"></p>
-                <span class="picker-chevron" aria-hidden="true">&#9660;</span>
-                <!-- Month / Year picker popover -->
-                <div class="month-picker" id="monthPicker" role="dialog" aria-label="Select month and year">
-                    <div class="picker-year-row">
-                        <button class="picker-year-btn" id="pickerPrevYear" aria-label="Previous year">&#8249;</button>
-                        <span class="picker-year-label" id="pickerYear"></span>
-                        <button class="picker-year-btn" id="pickerNextYear" aria-label="Next year">&#8250;</button>
+    <!-- ── View Segment Bar (mobile only) ── -->
+    <div class="view-seg-bar" role="tablist" aria-label="Calendar view">
+        <div class="view-seg">
+            <button class="view-seg-btn" data-view="compact" role="tab">
+                <span class="t-en">Compact</span><span class="t-mm">အတိုချုပ်</span>
+            </button>
+            <button class="view-seg-btn" data-view="month" role="tab">
+                <span class="t-en">Month</span><span class="t-mm">လ</span>
+            </button>
+            <button class="view-seg-btn" data-view="list" role="tab">
+                <span class="t-en">List</span><span class="t-mm">စာရင်း</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Offline Banner ── -->
+    <div id="offlineBanner" class="offline-banner" aria-live="polite" aria-atomic="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <span class="t-en">Offline · Data may be outdated</span><span class="t-mm">အင်တာနက်မရှိ · ဒေတာဟောင်းဖြစ်နိုင်</span>
+    </div>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+
+        <!-- Month View -->
+        <section class="view-panel view-month" id="viewMonth" role="tabpanel">
+            <div class="month-grid-col">
+                <div class="weekday-header" aria-hidden="true">
+                    <div><span class="t-en">Sun</span><span class="t-mm t-mm-short">နွေ</span><span class="t-mm t-mm-full">တနင်္ဂနွေ</span></div>
+                    <div><span class="t-en">Mon</span><span class="t-mm t-mm-short">လာ</span><span class="t-mm t-mm-full">တနင်္လာ</span></div>
+                    <div><span class="t-en">Tue</span><span class="t-mm t-mm-short">ဂါ</span><span class="t-mm t-mm-full">အင်္ဂါ</span></div>
+                    <div><span class="t-en">Wed</span><span class="t-mm t-mm-short">ဟူး</span><span class="t-mm t-mm-full">ဗုဒ္ဓဟူး</span></div>
+                    <div><span class="t-en">Thu</span><span class="t-mm t-mm-short">တေး</span><span class="t-mm t-mm-full">ကြာသပတေး</span></div>
+                    <div><span class="t-en">Fri</span><span class="t-mm t-mm-short">ကြာ</span><span class="t-mm t-mm-full">သောကြာ</span></div>
+                    <div><span class="t-en">Sat</span><span class="t-mm t-mm-short">နေ</span><span class="t-mm t-mm-full">စနေ</span></div>
+                </div>
+                <div class="cal-grid" id="calendarDays" role="grid" aria-label="Calendar days"></div>
+                <div class="cal-legend">
+                    <span class="legend-item"><span class="dot dot-holiday"></span><span class="t-en">Holiday</span><span class="t-mm">ရုံးပိတ်</span></span>
+                    <span class="legend-item"><span class="dot dot-fullmoon"></span><span class="t-en">Full Moon</span><span class="t-mm">လပြည့်</span></span>
+                    <span class="legend-item"><span class="dot dot-auspicious"></span><span class="t-en">Auspicious</span><span class="t-mm">မင်္ဂလာ</span></span>
+                    <span class="legend-item"><span class="dot dot-yatyaza"></span><span class="t-en">Yatyaza</span><span class="t-mm">ရက်ရာဇာ</span></span>
+                    <span class="legend-item"><span class="dot dot-pyathada"></span><span class="t-en">Pyathada</span><span class="t-mm">ပြဿဒါး</span></span>
+                </div>
+                <!-- Mobile-only holidays list (below calendar grid) -->
+                <div class="mobile-holidays-panel" id="mobileHolidaysPanel">
+                    <div class="mobile-holidays-hdr">
+                        <span class="dot dot-holiday" style="flex-shrink:0"></span>
+                        <span class="t-en">Public Holidays this Month</span>
+                        <span class="t-mm">ဤလ ရုံးပိတ်ရက်များ</span>
                     </div>
-                    <div class="picker-months-grid" id="pickerMonthsGrid"></div>
-                    <button class="picker-today-btn" id="pickerToday">&#x2318; Today</button>
+                    <div id="mobileHolidaysList"></div>
                 </div>
             </div>
-            <button id="nextMonth">Next &#8594;</button>
-        </div>
-
-        <div class="calendar-wrapper">
-            <!-- Print-only title — hidden on screen, shown when printing -->
-            <div class="print-header" id="printHeader">
-                <div class="print-header-left">
-                    <div class="print-title-en" id="printTitleEN"></div>
-                    <div class="print-title-mm" id="printTitleMM"></div>
+            <div class="detail-col" id="rightPane">
+                <div class="holidays-panel" id="holidaysSection">
+                    <div class="detail-hdr">
+                        <span class="detail-hdr-title"><span class="t-en">Holidays</span><span class="t-mm">ရုံးပိတ်ရက်</span></span>
+                    </div>
+                    <div class="holidays-body" id="holidaysList"></div>
                 </div>
-                <div class="print-header-right">
-                    <div class="print-app-name">Myanmar Calendar &nbsp;|&nbsp; မြန်မာပြက္ခဒိန်</div>
+                <div class="day-detail-panel" id="dayDetailPanel">
+                    <div class="detail-hdr">
+                        <button class="detail-back-btn" id="ddpBack" aria-label="Back">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <span class="detail-hdr-title" id="ddpTitle"></span>
+                    </div>
+                    <div class="day-detail-body" id="ddpBody"></div>
                 </div>
             </div>
-            <div class="weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
+        </section>
+
+        <!-- Compact View -->
+        <section class="view-panel view-compact" id="viewCompact" role="tabpanel">
+            <div class="compact-week-strip" id="compactWeekStrip">
+                <div class="compact-weekdays" aria-hidden="true">
+                    <span class="t-en">S</span><span class="t-mm">နွေ</span>
+                    <span class="t-en">M</span><span class="t-mm">လာ</span>
+                    <span class="t-en">T</span><span class="t-mm">ဂါ</span>
+                    <span class="t-en">W</span><span class="t-mm">ဟူး</span>
+                    <span class="t-en">T</span><span class="t-mm">တေး</span>
+                    <span class="t-en">F</span><span class="t-mm">ကြာ</span>
+                    <span class="t-en">S</span><span class="t-mm">နေ</span>
+                </div>
+                <div class="compact-week-days" id="compactWeekDays"></div>
             </div>
-            <div class="calendar-days" id="calendarDays"></div>
-        </div>
+            <div class="compact-day-detail" id="compactDayDetail">
+                <div class="compact-day-hdr" id="compactDayHdr"></div>
+                <div class="compact-day-body" id="compactDayBody"></div>
+            </div>
+        </section>
 
-        <!-- Legend visible ONLY when printing -->
-        <div class="print-legend">
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#99c1de;"></span>Today</span>
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#fde2e4;border:1px solid #fad2e1;"></span>Holiday</span>
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#c5dedd;border:1px solid #dbe7e4;"></span>Full Moon</span>
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#dbe7e4;border:1px solid #c5dedd;"></span>Auspicious</span>
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#f0efeb;border:1px solid #fad2e1;"></span>Yatyaza</span>
-            <span class="print-legend-item"><span class="print-legend-dot" style="background:#f0efeb;border:1px solid #eddcd2;"></span>Pyathada</span>
-        </div>
+        <!-- List View -->
+        <section class="view-panel view-list" id="viewList" role="tabpanel">
+            <div class="list-body" id="listBody"></div>
+        </section>
 
-        <div class="legend no-print">
-            <span class="legend-item"><span class="legend-dot" style="background:#99c1de;"></span>Today</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#fde2e4;border:1.5px solid #fad2e1;"></span>Holiday</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#c5dedd;border:1.5px solid #dbe7e4;"></span>Full Moon</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#dbe7e4;border:1.5px solid #c5dedd;"></span>Auspicious</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#f0efeb;border:1.5px solid #fad2e1;"></span>Yatyaza</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#f0efeb;border:1.5px solid #eddcd2;"></span>Pyathada</span>
-        </div>
+    </main>
 
-        <div class="holidays-section no-print">
-            <h3>Public Holidays</h3>
-            <div id="holidaysList"></div>
-        </div>
+    <!-- Hidden compat -->
+    <span id="currentMonth" style="display:none"></span>
+    <span id="myanmarDate" style="display:none"></span>
 
+</div><!-- /.app -->
+
+<!-- Bottom Sheet Modal -->
+<div class="sheet-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="modalClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="modalTitle"></span>
+        </div>
+        <div class="sheet-body" id="dayInfo"></div>
     </div>
+</div>
 
-    <!-- Day Info Modal -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-panel" id="infoPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <div class="modal-header">
-                <h3 id="modalTitle">Day Information</h3>
-                <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-            </div>
-            <div class="modal-body" id="dayInfo"></div>
-        </div>
-    </div>
+<script src="mmcal.js"></script>
+<script src="holidays.js"></script>
+<script src="app.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        // Register SW after page load to avoid competing with initial resource fetch
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                // When a new SW is waiting, activate it immediately on next navigation
+                // (avoids users being stuck on old shell for a full browser close/reopen)
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New shell is ready — send skipWaiting to activate now
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    });
+                });
+            }).catch(() => { /* SW not supported in this context */ });
 
-    <script src="mmcal.js"></script>
-    <script src="holidays.js"></script>
-    <script src="app.js"></script>
+            // When a new SW takes control, reload the page to get the fresh shell
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        });
+    }
+</script>
 </body>
 </html>
