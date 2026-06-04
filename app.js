@@ -732,7 +732,7 @@ function renderCompact() {
         const isTd   = isToday(y, m, dd);
         const isSel  = selectedDay && selectedDay.year === y && selectedDay.month === m && selectedDay.day === dd;
         const isSun  = d.getDay() === 0;
-        const { holidays, moon, sabbath, amye, thamaphyu } = getDayData(y, m, dd);
+        const { holidays, moon, sabbath, amye, thamaphyu, fd } = getDayData(y, m, dd);
         const hasDot = holidays.length || moon === 'Full Moon' || sabbath.sabbath || amye || thamaphyu;
 
         const btn = document.createElement('button');
@@ -746,7 +746,7 @@ function renderCompact() {
         const noteIndCv = dayNotesCv.length ? `<span class="compact-note-badge" style="background:${dayNotesCv[0].color}">${dayNotesCv[0].icon}</span>` : '';
         const dayAlarmsCv = getAlarmsForDate(y, m, dd).filter(a => a.enabled);
         const alarmIndCv = dayAlarmsCv.length ? `<span class="compact-alarm-badge">⏰</span>` : '';
-        btn.innerHTML = `<div class="compact-day-num-wrap"><span class="compact-day-num">${dd}</span>${noteIndCv}${alarmIndCv}</div><span class="compact-day-dot${hasDot ? '' : ' invisible'}"></span>`;
+        btn.innerHTML = `<div class="compact-day-num-wrap"><span class="compact-day-num">${dd}</span>${noteIndCv}${alarmIndCv}</div><span class="compact-myanmar-num">${toMM(fd)}</span><span class="compact-day-dot${hasDot ? '' : ' invisible'}"></span>`;
 
         btn.addEventListener('click', () => {
             // If clicking a different month, navigate
