@@ -1587,6 +1587,13 @@ html[data-view="list"]    .view-list    { display: flex; }
     font-size: 16px;
     font-weight: 400;
     color: var(--label-primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.settings-row-icon {
+    flex-shrink: 0;
+    opacity: 0.9;
 }
 
 /* ── iOS-style toggle switch ──────────────────────────── */
@@ -1645,6 +1652,10 @@ html[data-view="list"]    .view-list    { display: flex; }
     transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
     display: flex; align-items: center; justify-content: center;
     white-space: nowrap;
+    gap: 4px;
+}
+.theme-seg-icon {
+    flex-shrink: 0;
 }
 .theme-seg-btn.active {
     background: var(--glass-bg-heavy);

@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 const APP_VERSION = '1.0.0';
-const APP_CACHE_VERSION = 'v46'; // matches SHELL_CACHE in sw.js
+const APP_CACHE_VERSION = 'v47'; // matches SHELL_CACHE in sw.js
 
 // ── State ──────────────────────────────────────────────
 let today          = new Date();   // refreshed at midnight
