@@ -1738,6 +1738,68 @@ html[data-view="list"]    .view-list    { display: flex; }
 }
 .about-link:hover { text-decoration: underline; }
 
+/* ── About sheet — info card + features ──────────────── */
+.about-info-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-card);
+    margin: 12px 8px 0;
+    overflow: hidden;
+}
+.about-section-hdr {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--label-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 20px 16px 8px;
+}
+.about-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 8px 8px;
+}
+.about-feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-card);
+    padding: 12px 14px;
+}
+.about-feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--fill-secondary);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+.about-feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.about-feature-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--label-primary);
+    letter-spacing: -0.2px;
+}
+.about-feature-desc {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--label-secondary);
+    line-height: 1.35;
+}
+
 /* ── My Holidays (custom client-side holidays) ────────── */
 .custom-holidays-list { max-height: 240px; overflow-y: auto; }
 .custom-holiday-empty {

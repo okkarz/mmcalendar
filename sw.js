@@ -14,7 +14,7 @@
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SHELL_CACHE = 'mmcal-shell-v47';
+const SHELL_CACHE = 'mmcal-shell-v49';
 const DATA_CACHE  = 'mmcal-data-v1';
 
 const SHELL_URLS = [

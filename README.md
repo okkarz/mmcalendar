@@ -27,7 +27,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | 📊 Analytics | Per-category totals + full dashboard with date ranges & 360° view | စာရင်းအင်း ဒက်ရှ်ဘုတ် |
 | 📅 Custom Days | User-defined days: Holiday, Birthday, Anniversary, Event, Reminder | ကိုယ်ပိုင် နေ့များ |
 | 💾 Storage Manager | Usage, per-file limits, attachment list with thumbnails, clear all | သိုလှောင်မှု စီမံခန့်ခွဲမှု |
-| � System / Light / Dark Theme | Follows OS preference, or force light/dark — persistent | စနစ် / အလင်း / အမှောင် အပြင်အဆင် |
+| 🌓 System / Light / Dark Theme | Follows OS preference, or force light/dark — persistent | စနစ် / အလင်း / အမှောင် အပြင်အဆင် |
 | 🌐 Language Toggle | EN / မြ segmented control | ဘာသာစကား ပြောင်းလဲနိုင် |
 | 📱 Responsive | Mobile · Tablet · Desktop layouts | မိုဘိုင်း · တက်ဘလက် · ဒက်စ်တော့ |
 | 📲 PWA | Installable, offline-capable via Service Worker | အင်တာနက်မပါဘဲ အသုံးပြုနိုင် |

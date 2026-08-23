@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 const APP_VERSION = '1.0.0';
-const APP_CACHE_VERSION = 'v47'; // matches SHELL_CACHE in sw.js
+const APP_CACHE_VERSION = 'v49'; // matches SHELL_CACHE in sw.js
 
 // ── State ──────────────────────────────────────────────
 let today          = new Date();   // refreshed at midnight
@@ -12,7 +12,7 @@ let currentMonth   = today.getMonth() + 1;
 let currentLang    = localStorage.getItem('mm-lang')  || 'en';
 let currentView    = localStorage.getItem('mm-view')  || 'month';
 let notesEnabled   = localStorage.getItem('mm-notes-enabled')  !== 'false';
-let alarmsEnabled  = localStorage.getItem('mm-alarms-enabled') !== 'false';
+let alarmsEnabled  = localStorage.getItem('mm-alarms-enabled') === 'true'; // default OFF
 let hideEmptyListDays = localStorage.getItem('mm-hide-empty-list') !== 'false';
 let selectedDay    = null;  // { year, month, day }
 let pickerYear     = currentYear;
@@ -465,6 +465,14 @@ function openStorageSheet() {
 }
 function closeStorageSheet() {
     document.getElementById('storageSheet').classList.remove('active');
+}
+
+// ── About sheet — app info + README features ───────────
+function openAboutSheet() {
+    document.getElementById('aboutSheet').classList.add('active');
+}
+function closeAboutSheet() {
+    document.getElementById('aboutSheet').classList.remove('active');
 }
 
 // Collect every attachment: [{ attachId, noteId, key, y, m, d, name, type, size, noteText }]
@@ -2534,7 +2542,7 @@ function setupListeners() {
     const holidaySheetClose = document.getElementById('holidaySheetClose');
     if (holidaySheetClose) holidaySheetClose.addEventListener('click', closeHolidaySheet);
     // Close sheets on overlay tap
-    ['catSheet','holidaySheet','analyticsSheet','storageSheet'].forEach(id => {
+    ['catSheet','holidaySheet','analyticsSheet','storageSheet','aboutSheet'].forEach(id => {
         const ov = document.getElementById(id);
         if (ov) ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('active'); });
     });
@@ -2543,6 +2551,11 @@ function setupListeners() {
     if (storageBtn) storageBtn.addEventListener('click', openStorageSheet);
     const storageSheetClose = document.getElementById('storageSheetClose');
     if (storageSheetClose) storageSheetClose.addEventListener('click', closeStorageSheet);
+    // About sheet open/close
+    const aboutBtn = document.getElementById('aboutBtn');
+    if (aboutBtn) aboutBtn.addEventListener('click', openAboutSheet);
+    const aboutSheetClose = document.getElementById('aboutSheetClose');
+    if (aboutSheetClose) aboutSheetClose.addEventListener('click', closeAboutSheet);
     const ncAdd = document.getElementById('noteCatAdd');
     const ncForm = document.getElementById('noteCatForm');
     if (ncAdd && ncForm) {
@@ -2812,7 +2825,7 @@ function setupListeners() {
 
     // Escape
     document.addEventListener('keydown', e => {
-        if (e.key==='Escape') { closeModal(); closePicker(); closeSettings(); closeAllSheets(); closeStorageSheet(); closeAnalyticsPage(); }
+        if (e.key==='Escape') { closeModal(); closePicker(); closeSettings(); closeAllSheets(); closeStorageSheet(); closeAboutSheet(); closeAnalyticsPage(); }
     });
 
     // Resize: close sheet when going to desktop

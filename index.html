@@ -346,41 +346,12 @@
             <div class="settings-group">
                 <p class="settings-group-hdr"><span class="t-en">About</span><span class="t-mm">အကြောင်း</span></p>
                 <div class="settings-card">
-                    <div class="about-hero">
-                        <img class="about-logo" src="icon.png" alt="Myanmar Calendar logo">
-                        <div class="about-name"><span class="t-en">Myanmar Calendar</span><span class="t-mm">မြန်မာပြက္ခဒိန်</span></div>
-                        <div class="about-version" id="aboutVersion">v1.0.0</div>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">
-                            <span class="t-en">👨‍💻 Developer</span><span class="t-mm">👨‍💻 တီထွင်သူ</span>
+                    <button class="settings-nav-row" id="aboutBtn" type="button">
+                        <span class="settings-nav-label">
+                            <span class="t-en">ℹ️ About</span><span class="t-mm">ℹ️ အကြောင်း</span>
                         </span>
-                        <span class="about-value">Okkar Thet Naing</span>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">
-                            <span class="t-en">🏢 Company</span><span class="t-mm">🏢 ကုမ္ပဏီ</span>
-                        </span>
-                        <span class="about-value">GoeTecX</span>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">
-                            <span class="t-en">🌐 Website</span><span class="t-mm">🌐 ဝက်ဘ်ဆိုက်</span>
-                        </span>
-                        <a class="about-link" href="https://goetecx.com" target="_blank" rel="noopener">goetecx.com</a>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">
-                            <span class="t-en">📱 App Version</span><span class="t-mm">📱 အက်ပ် ဗားရှင်း</span>
-                        </span>
-                        <span class="about-value" id="aboutVersionRow">1.0.0</span>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">
-                            <span class="t-en">🗄️ Cache Version</span><span class="t-mm">🗄️ ကက်ရှ် ဗားရှင်း</span>
-                        </span>
-                        <span class="about-value" id="aboutCacheRow">—</span>
-                    </div>
+                        <svg class="settings-nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -564,6 +535,209 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                 <span class="t-en">Clear All Attachments</span><span class="t-mm">ဖိုင်အားလုံး ရှင်းရန်</span>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- About Sheet -->
+<div class="sheet-overlay sheet-over-top" id="aboutSheet" role="dialog" aria-modal="true" aria-labelledby="aboutSheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="aboutSheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="aboutSheetTitle"><span class="t-en">ℹ️ About</span><span class="t-mm">ℹ️ အကြောင်း</span></span>
+        </div>
+        <div class="sheet-body">
+            <div class="about-hero">
+                <img class="about-logo" src="icon.png" alt="Myanmar Calendar logo">
+                <div class="about-name"><span class="t-en">Myanmar Calendar</span><span class="t-mm">မြန်မာပြက္ခဒိန်</span></div>
+                <div class="about-version" id="aboutVersion">v1.0.0</div>
+            </div>
+            <div class="about-info-card">
+                <div class="settings-row">
+                    <span class="settings-row-label">
+                        <span class="t-en">👨‍💻 Developer</span><span class="t-mm">👨‍💻 တီထွင်သူ</span>
+                    </span>
+                    <span class="about-value">Okkar Thet Naing</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">
+                        <span class="t-en">🏢 Company</span><span class="t-mm">🏢 ကုမ္ပဏီ</span>
+                    </span>
+                    <span class="about-value">GoeTecX</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">
+                        <span class="t-en">🌐 Website</span><span class="t-mm">🌐 ဝက်ဘ်ဆိုက်</span>
+                    </span>
+                    <a class="about-link" href="https://goetecx.com" target="_blank" rel="noopener">goetecx.com</a>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">
+                        <span class="t-en">📱 App Version</span><span class="t-mm">📱 အက်ပ် ဗားရှင်း</span>
+                    </span>
+                    <span class="about-value" id="aboutVersionRow">1.0.0</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">
+                        <span class="t-en">🗄️ Cache Version</span><span class="t-mm">🗄️ ကက်ရှ် ဗားရှင်း</span>
+                    </span>
+                    <span class="about-value" id="aboutCacheRow">—</span>
+                </div>
+            </div>
+
+            <p class="about-section-hdr"><span class="t-en">✨ Features</span><span class="t-mm">✨ လုပ်ဆောင်ချက်များ</span></p>
+            <div class="about-features">
+                <div class="about-feature">
+                    <span class="about-feature-icon">📅</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Dual Calendar</span><span class="t-mm">ပြက္ခဒိန် နှစ်မျိုး</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Gregorian + Myanmar lunar date on every cell</span><span class="t-mm">Gregory + မြန်မာသက္ကရာဇ် ၂ မျိုးစလုံး</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🎌</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Public Holidays</span><span class="t-mm">ရုံးပိတ်ရက်များ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">All Myanmar public holidays with bilingual names</span><span class="t-mm">ပြည်သူ့ရုံးပိတ်ရက် အပြည့်အစုံ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🌕</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Moon Phases</span><span class="t-mm">လဆန်း လပြည့်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Full Moon / New Moon pill badge anchored to date circle</span><span class="t-mm">လပြည့် / လကွယ် ဖော်ပြချက်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🔮</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Astrology</span><span class="t-mm">နက္ခတ်ဗေဒင်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Mahabote, Nakhat, Nagahle per day (fully bilingual)</span><span class="t-mm">မဟာဘုတ်, နက္ခက်, နဂါးခေါင်း</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">☸️</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Sabbath</span><span class="t-mm">ဥပုသ်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Sabbath (ဥပုသ်) marker with ☸️ icon</span><span class="t-mm">ဥပုသ်နေ့ ☸️ သင်္ကေတ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🌈</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Yatyaza</span><span class="t-mm">ရက်ရာဇာ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Yatyaza (ရက်ရာဇာ) caution marker with 🌈 icon</span><span class="t-mm">ရက်ရာဇာနေ့ 🌈 သင်္ကေတ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">⚠️</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Auspicious Days</span><span class="t-mm">မင်္ဂလာနေ့များ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Yatyaza, Pyathada, Sabbath, Thamaphyu & more</span><span class="t-mm">ရက်ရာဇာ, ပြဿဒါး, ဥပုသ်, သမားဖြူ စသည်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">📋</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Notes</span><span class="t-mm">မှတ်စုများ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Per-day notes with icons, colors, categories & attachments</span><span class="t-mm">နေ့အလိုက် မှတ်စုများ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🗂️</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Note Categories</span><span class="t-mm">မှတ်စု အမျိုးအစားများ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Main + sub categories with data types (amount/time/length/weight)</span><span class="t-mm">ဒေတာ အမျိုးအစားများဖြင့်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🧮</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Aggregation Modes</span><span class="t-mm">တွက်နည်းများ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Sum / Net (±) / Last / Average per sub-category</span><span class="t-mm">စုစုပေါင်း/အသားတင်/နောက်ဆုံး/ပျမ်းမျှ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">📎</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Attachments</span><span class="t-mm">ဖိုင်များ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Multiple files per note, stored client-side in IndexedDB</span><span class="t-mm">ကိုယ်ပိုင် သိုလှောင်မှု</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">📊</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Analytics</span><span class="t-mm">စာရင်းအင်း</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Per-category totals + full dashboard with date ranges & 360° view</span><span class="t-mm">ဒက်ရှ်ဘုတ် အပြည့်အစုံ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">📅</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Custom Days</span><span class="t-mm">ကိုယ်ပိုင် နေ့များ</span></span>
+                        <span class="about-feature-desc"><span class="t-en">User-defined days: Holiday, Birthday, Anniversary, Event, Reminder</span><span class="t-mm">အားလပ်ရက်၊ မွေးနေ့၊ နှစ်ပတ်လည် စသည်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">💾</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Storage Manager</span><span class="t-mm">သိုလှောင်မှု စီမံခန့်ခွဲမှု</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Usage, per-file limits, attachment list with thumbnails, clear all</span><span class="t-mm">အသုံးပြုမှု၊ ဖိုင်ကန့်သတ်ချက်များ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🌓</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">System / Light / Dark Theme</span><span class="t-mm">စနစ် / အလင်း / အမှောင်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Follows OS preference, or force light/dark — persistent</span><span class="t-mm">စနစ်အတိုင်း လိုက်နာ သို့မဟုတ် သတ်မှတ်နိုင်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🌐</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Language Toggle</span><span class="t-mm">ဘာသာစကား</span></span>
+                        <span class="about-feature-desc"><span class="t-en">EN / မြ segmented control</span><span class="t-mm">EN / မြ ရွေးချယ်နိုင်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">📲</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">PWA</span><span class="t-mm">PWA</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Installable, offline-capable via Service Worker</span><span class="t-mm">အင်တာနက်မပါဘဲ အသုံးပြုနိုင်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🗓️</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">3-View Mode</span><span class="t-mm">မြင်ကွင်း ၃ မျိုး</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Month · Compact · List views</span><span class="t-mm">လ / အတိုချုပ် / စာရင်း</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">👆</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Swipe Navigation</span><span class="t-mm">ပွတ်ဆွဲ လမ်းညွှန်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Swipe left/right to change month (or week in Compact view)</span><span class="t-mm">ဘေးတိုက် ပွတ်ဆွဲ၍ လပြောင်းနိုင်</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">🔖</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Dynamic Favicon</span><span class="t-mm">ဖာဗီကွန်</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Tab icon updates daily to show today's date</span><span class="t-mm">တက်ဘ်တွင် ယနေ့ရက်ဖော်ပြ</span></span>
+                    </div>
+                </div>
+                <div class="about-feature">
+                    <span class="about-feature-icon">⏰</span>
+                    <div class="about-feature-text">
+                        <span class="about-feature-name"><span class="t-en">Midnight Refresh</span><span class="t-mm">သန်းခေါင် ပြောင်းလဲမှု</span></span>
+                        <span class="about-feature-desc"><span class="t-en">Today highlight + favicon auto-update at midnight</span><span class="t-mm">ယနေ့ ရက်အလိုအလျောက်ပြောင်း</span></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
