@@ -19,7 +19,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | ☸️ Sabbath | Sabbath (ဥပုသ်) marker with ☸️ icon | ဥပုသ်နေ့ ☸️ သင်္ကေတ |
 | 🌈 Yatyaza | Yatyaza (ရက်ရာဇာ) caution marker with 🌈 icon | ရက်ရာဇာနေ့ 🌈 သင်္ကေတ |
 | ⚠️ Auspicious Days | Yatyaza, Pyathada, Sabbath, Thamaphyu & more | ရက်ရာဇာ, ပြဿဒါး, ဥပုသ်, သမားဖြူ စသည် |
-| ⚙️ Settings Page | Dark mode, language, feature toggles, storage, about | ဆက်တင်များ — အမှောင်/အလင်း၊ ဘာသာ၊ လုပ်ဆောင်ချက် |
+| ⚙️ Settings Page | Theme (System/Light/Dark), language, feature toggles, storage, about | ဆက်တင်များ — အပြင်အဆင်/ဘာသာ/လုပ်ဆောင်ချက် |
 | 📋 Notes | Per-day notes with icons, colors, categories & attachments | နေ့အလိုက် မှတ်စုများ |
 | 🗂️ Note Categories | Main + sub categories with data types (amount/time/length/weight) | မှတ်စု အမျိုးအစားများ |
 | 🧮 Aggregation Modes | Sum / Net (±) / Last / Average per sub-category | တွက်နည်း — စုစုပေါင်း/အသားတင်/နောက်ဆုံး/ပျမ်းမျှ |
@@ -27,7 +27,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | 📊 Analytics | Per-category totals + full dashboard with date ranges & 360° view | စာရင်းအင်း ဒက်ရှ်ဘုတ် |
 | 📅 Custom Days | User-defined days: Holiday, Birthday, Anniversary, Event, Reminder | ကိုယ်ပိုင် နေ့များ |
 | 💾 Storage Manager | Usage, per-file limits, attachment list with thumbnails, clear all | သိုလှောင်မှု စီမံခန့်ခွဲမှု |
-| 🌙 Dark / Light Mode | Persistent theme toggle in unified glass capsule | မှောင်မိုက် / အလင်း မုဒ်ပြောင်းနိုင် |
+| � System / Light / Dark Theme | Follows OS preference, or force light/dark — persistent | စနစ် / အလင်း / အမှောင် အပြင်အဆင် |
 | 🌐 Language Toggle | EN / မြ segmented control | ဘာသာစကား ပြောင်းလဲနိုင် |
 | 📱 Responsive | Mobile · Tablet · Desktop layouts | မိုဘိုင်း · တက်ဘလက် · ဒက်စ်တော့ |
 | 📲 PWA | Installable, offline-capable via Service Worker | အင်တာနက်မပါဘဲ အသုံးပြုနိုင် |
@@ -46,7 +46,7 @@ Opened via the ⚙️ gear icon in the nav bar. Compact iOS-style page with bott
 
 | Section | Contents |
 |---|---|
-| **Appearance** | 🌙 Dark Mode toggle |
+| **Appearance** | � Theme segmented control — System (follows OS) / Light / Dark |
 | **Language** | EN / မြ segmented control |
 | **Features** | ⏰ Alarms toggle |
 | **Notes & Categories** | 📋 Notes toggle · 🗂️ Categories toggle · **Manage Categories** sheet |
@@ -342,7 +342,7 @@ Optionally **hide empty days** (no events) via Settings → Data → Hide Empty 
 
 | Storage | Key | Contents |
 |---|---|---|
-| `localStorage` | `mm-theme` | Dark/light mode |
+| `localStorage` | `mm-theme` | `system` / `light` / `dark` (default `system`) |
 | `localStorage` | `mm-lang` | EN/မြ language |
 | `localStorage` | `mm-view` | Month/Compact/List view |
 | `localStorage` | `mm-notes` | Notes (text, icon, color, category, value, attachment metadata) |
@@ -586,7 +586,7 @@ In `app.js`: `wdMM = (Date.getDay() + 1) % 7`
 - `line-height: 1.6` and `overflow: visible` on nav title
 
 ### v2.1 — UI Polish
-- Unified Liquid Glass capsule (Dark + Language toggles)
+- Unified Liquid Glass capsule (Theme + Language segmented controls)
 
 ### v2.0 — iOS 26 Liquid Glass Redesign
 - Full rebuild; 3-view mode; ambient blobs; glass nav
