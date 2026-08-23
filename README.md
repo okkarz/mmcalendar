@@ -4,7 +4,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 
 မြန်မာဘာသာ + အင်္ဂလိပ်ဘာသာ iOS 26 Liquid Glass ဒီဇိုင်း PWA၊ Gregory နှင့် မြန်မာ ပြက္ခဒိန် နှစ်မျိုးစလုံး၊ ပြည်သူ့ရုံးပိတ်ရက်များ၊ လဆုပ်လဆန်း၊ နက္ခတ်ဗေဒင် အချက်အလက်များ offline ဖော်ပြသည့် ဝက်ဘ်အက်ပ်ဖြစ်သည်။
 
-**Version:** 1.0.0 · **Developer:** Okkar Thet Naing · **Company:** GoeTecX
+**Version:** 3.0.4 · **Developer:** Okkar Thet Naing · **Company:** GoeTecX
 
 ---
 

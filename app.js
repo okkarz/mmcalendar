@@ -2,8 +2,8 @@
 //  Myanmar Calendar — iOS-style App Logic
 // ═══════════════════════════════════════════════════════
 
-const APP_VERSION = '1.0.0';
-const APP_CACHE_VERSION = 'v49'; // matches SHELL_CACHE in sw.js
+const APP_VERSION = '3.0.4';
+const APP_CACHE_VERSION = 'v50'; // matches SHELL_CACHE in sw.js
 
 // ── State ──────────────────────────────────────────────
 let today          = new Date();   // refreshed at midnight
