@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════
 
 const APP_VERSION = '1.0.0';
-const APP_CACHE_VERSION = 'v45'; // matches SHELL_CACHE in sw.js
+const APP_CACHE_VERSION = 'v46'; // matches SHELL_CACHE in sw.js
 
 // ── State ──────────────────────────────────────────────
 let today          = new Date();   // refreshed at midnight
@@ -1562,7 +1562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.classList.toggle('active', btn.dataset.lang === currentLang);
         btn.setAttribute('aria-pressed', String(btn.dataset.lang === currentLang));
     });
-    syncThemeSwitch();
+    syncThemeSeg();
     syncFeatureSwitches();
     syncCustomLegend();
     syncCategoriesSwitch();
@@ -1590,7 +1590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const MOBILE_HOLIDAYS_MAX = 3; // items shown before "Show all" on mobile
 
 function openSettings() {
-    syncThemeSwitch();
+    syncThemeSeg();
     syncFeatureSwitches();
     syncCategoriesSwitch();
     renderStorageInfo();
@@ -1830,13 +1830,42 @@ function renderAnalyticsDashboard() {
         }).join('');
     }
 }
-function syncThemeSwitch() {
-    const sw = document.getElementById('darkModeSwitch');
-    if (!sw) return;
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    sw.classList.toggle('on', dark);
-    sw.setAttribute('aria-checked', String(dark));
+// ── Theme: system / light / dark ────────────────────────
+let themeMode = localStorage.getItem('mm-theme') || 'system';
+const _darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+
+function applyTheme(mode) {
+    themeMode = mode;
+    localStorage.setItem('mm-theme', mode);
+    const meta = document.getElementById('metaThemeColor');
+    const dark = mode === 'dark' || (mode === 'system' && _darkMQ.matches);
+    if (dark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (meta) meta.setAttribute('content', '#1c1c1e');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        if (meta) meta.setAttribute('content', '#f2f2f7');
+    }
+    syncThemeSeg();
 }
+
+function syncThemeSeg() {
+    document.querySelectorAll('.theme-seg-btn').forEach(btn => {
+        const active = btn.dataset.themeMode === themeMode;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', String(active));
+    });
+}
+
+// Follow OS theme changes while in System mode
+if (_darkMQ.addEventListener) {
+    _darkMQ.addEventListener('change', () => {
+        if (themeMode === 'system') applyTheme('system');
+    });
+} else if (_darkMQ.addListener) { // older Safari
+    _darkMQ.addListener(() => { if (themeMode === 'system') applyTheme('system'); });
+}
+
 function syncFeatureSwitches() {
     const ns = document.getElementById('notesSwitch');
     if (ns) {
@@ -2436,21 +2465,9 @@ function setupListeners() {
         });
     });
 
-    // Theme (settings page switch)
-    const darkSwitch = document.getElementById('darkModeSwitch');
-    if (darkSwitch) darkSwitch.addEventListener('click', () => {
-        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const meta = document.getElementById('metaThemeColor');
-        if (dark) {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('mm-theme', 'light');
-            if (meta) meta.setAttribute('content', '#f2f2f7');
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('mm-theme', 'dark');
-            if (meta) meta.setAttribute('content', '#1c1c1e');
-        }
-        syncThemeSwitch();
+    // Theme (settings page segmented control: System / Light / Dark)
+    document.querySelectorAll('.theme-seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyTheme(btn.dataset.themeMode));
     });
 
     // Features (settings page switches)

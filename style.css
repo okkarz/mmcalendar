@@ -1625,6 +1625,36 @@ html[data-view="list"]    .view-list    { display: flex; }
     font-size: 13px;
 }
 
+/* ── Settings theme segment — System / Light / Dark ───── */
+.theme-seg {
+    display: flex;
+    align-items: center;
+    background: var(--fill-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-full);
+    padding: 2px;
+    gap: 1px;
+}
+.theme-seg-btn {
+    padding: 5px 12px;
+    height: 30px;
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--label-secondary);
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex; align-items: center; justify-content: center;
+    white-space: nowrap;
+}
+.theme-seg-btn.active {
+    background: var(--glass-bg-heavy);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: var(--label-primary);
+    box-shadow: var(--shadow-sm), var(--glass-glow);
+    border: 1px solid var(--glass-border);
+}
+
 /* Day-type chips in custom day form */
 .ch-type-chips {
     display: flex;

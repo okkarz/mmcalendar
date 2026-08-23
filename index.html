@@ -17,9 +17,15 @@
     <link rel="stylesheet" href="style.css">
     <script>
         (function(){
-            const t = localStorage.getItem('mm-theme');
+            const t = localStorage.getItem('mm-theme') || 'system';
             const v = localStorage.getItem('mm-view') || 'month';
-            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            // Theme: 'system' follows the OS preference
+            const dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (dark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                const meta = document.getElementById('metaThemeColor');
+                if (meta) meta.setAttribute('content', '#1c1c1e');
+            }
             document.documentElement.setAttribute('data-view', v);
             const lang = localStorage.getItem('mm-lang') || 'en';
             document.documentElement.setAttribute('data-lang', lang);
@@ -231,11 +237,19 @@
                 <div class="settings-card">
                     <div class="settings-row">
                         <span class="settings-row-label">
-                            <span class="t-en">🌙 Dark Mode</span><span class="t-mm">🌙 အမှောင်မုဒ်</span>
+                            <span class="t-en">� Theme</span><span class="t-mm">🌓 အပြင်အဆင်</span>
                         </span>
-                        <button class="switch" id="darkModeSwitch" role="switch" aria-checked="false" aria-label="Dark mode">
-                            <span class="switch-thumb"></span>
-                        </button>
+                        <div class="theme-seg" role="radiogroup" aria-label="Theme">
+                            <button class="theme-seg-btn" data-theme-mode="system" aria-pressed="false">
+                                <span class="t-en">System</span><span class="t-mm">စနစ်</span>
+                            </button>
+                            <button class="theme-seg-btn" data-theme-mode="light" aria-pressed="false">
+                                <span class="t-en">Light</span><span class="t-mm">အလင်း</span>
+                            </button>
+                            <button class="theme-seg-btn" data-theme-mode="dark" aria-pressed="false">
+                                <span class="t-en">Dark</span><span class="t-mm">အမှောင်</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
