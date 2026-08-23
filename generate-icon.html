@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generate App Icon</title>
+<style>
+  body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 24px; background: #f2f2f7; margin: 0; }
+  canvas { border-radius: 22.5%; box-shadow: 0 8px 32px rgba(0,0,0,0.22); }
+  .btn { background: #007AFF; color: #fff; border: none; border-radius: 12px; padding: 14px 32px; font-size: 1.1em; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .btn:hover { opacity: 0.85; }
+  p { color: #636366; font-size: 0.9em; text-align: center; max-width: 360px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h2 style="color:#1c1c1e;margin:0">MM Calendar — App Icon</h2>
+<canvas id="c" width="512" height="512"></canvas>
+<a class="btn" id="dl">⬇ Download icon.png</a>
+<p>Save the downloaded file as <strong>icon.png</strong> in your project folder, replacing the existing one.</p>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const S      = 512;
+const R      = 96; // corner radius
+
+// ── Rounded rect clip ──
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// Clip to rounded square
+roundRect(0, 0, S, S, R);
+ctx.clip();
+
+// ── White background ──
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0, 0, S, S);
+
+// ── Red header band (~28%) ──
+const headerH = 142;
+ctx.fillStyle = '#FF3B30';
+ctx.fillRect(0, 0, S, headerH);
+
+// ── Subtle header gradient ──
+const grad = ctx.createLinearGradient(0, 0, 0, headerH);
+grad.addColorStop(0, 'rgba(255,255,255,0.18)');
+grad.addColorStop(1, 'rgba(0,0,0,0.0)');
+ctx.fillStyle = grad;
+ctx.fillRect(0, 0, S, headerH);
+
+// ── Month text in header: "MM CAL" ──
+ctx.fillStyle = '#ffffff';
+ctx.font      = 'bold 72px -apple-system, "Helvetica Neue", sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('MM CAL', S / 2, headerH / 2 + 4);
+
+// ── Separator line ──
+ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+ctx.lineWidth   = 2;
+ctx.beginPath(); ctx.moveTo(0, headerH); ctx.lineTo(S, headerH); ctx.stroke();
+
+// ── Calendar grid in body ──
+const bodyTop  = headerH + 20;
+const bodyH    = S - headerH - 20;
+const cols     = 7;
+const rows     = 5;
+const cellW    = (S - 60) / cols;
+const cellH    = (bodyH - 60) / rows;
+const startX   = 30;
+const startY   = headerH + 36;
+
+// Weekday labels
+const days = ['S','M','T','W','T','F','S'];
+ctx.font      = 'bold 30px -apple-system, sans-serif';
+ctx.fillStyle = '#8e8e93';
+ctx.textBaseline = 'middle';
+days.forEach((d, i) => {
+  ctx.fillStyle = (i === 0 || i === 6) ? '#FF3B30' : '#8e8e93';
+  ctx.fillText(d, startX + i * cellW + cellW / 2, startY);
+});
+
+// Day numbers 1–31
+ctx.font = '28px -apple-system, sans-serif';
+let dayNum = 1;
+for (let r = 0; r < rows && dayNum <= 31; r++) {
+  for (let c = 0; c < cols && dayNum <= 31; c++) {
+    const x = startX + c * cellW + cellW / 2;
+    const y = startY + 42 + r * cellH + cellH / 2;
+
+    if (dayNum === 1) {
+      // Highlight day 1 as "today" circle
+      ctx.fillStyle = '#FF3B30';
+      ctx.beginPath();
+      ctx.arc(x, y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+    } else {
+      ctx.fillStyle = (c === 0 || c === 6) ? '#FF3B30' : '#1c1c1e';
+    }
+    ctx.fillText(dayNum, x, y);
+    dayNum++;
+  }
+}
+
+// ── Download link ──
+document.getElementById('dl').href     = canvas.toDataURL('image/png');
+document.getElementById('dl').download = 'icon.png';
+</script>
+</body>
+</html>

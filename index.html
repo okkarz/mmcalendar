@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myanmar Calendar - မြန်မာပြက္ခဒိန်</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f2f2f7" id="metaThemeColor">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MM Calendar">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="MM Calendar">
+    <meta name="description" content="Myanmar Calendar with public holidays, moon phases and astrology">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function(){
+            const t = localStorage.getItem('mm-theme');
+            const v = localStorage.getItem('mm-view') || 'month';
+            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-view', v);
+            const lang = localStorage.getItem('mm-lang') || 'en';
+            document.documentElement.setAttribute('data-lang', lang);
+        })();
+    </script>
+</head>
+<body>
+
+<!-- Liquid Glass ambient blobs -->
+<div class="lg-bg" aria-hidden="true">
+    <div class="lg-blob lg-blob-1"></div>
+    <div class="lg-blob lg-blob-2"></div>
+    <div class="lg-blob lg-blob-3"></div>
+</div>
+
+<div class="app">
+
+    <!-- ── Nav Bar ── -->
+    <header class="nav-bar">
+        <div class="nav-leading">
+            <button id="prevMonth" class="nav-arrow-btn" aria-label="Previous month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button id="todayBtn" class="nav-today-btn" aria-label="Go to today">
+                <span class="t-en">Today</span><span class="t-mm">ယနေ့</span>
+            </button>
+        </div>
+
+        <div class="nav-title-area">
+            <button class="nav-title-btn" id="headerTitleBlock" aria-haspopup="true" aria-expanded="false" aria-label="Pick month">
+                <div class="nav-title-main">
+                    <span class="nav-month" id="headerMonth"></span>
+                    <span class="nav-year" id="headerYear"></span>
+                    <svg class="nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-subtitle" id="headerMmMonth"></div>
+            </button>
+        </div>
+
+        <div class="nav-trailing">
+            <button id="settingsBtn" class="nav-arrow-btn" aria-label="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <button id="nextMonth" class="nav-arrow-btn" aria-label="Next month">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- ── Month Picker Popover (position:fixed, zero layout height) ── -->
+    <div class="picker-popover" id="pickerPanel" aria-hidden="true">
+        <div class="picker-inner">
+            <div class="picker-year-row">
+                <button id="pickerPrevYear" class="picker-year-btn" aria-label="Previous year">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span id="pickerYearLabel" class="picker-year-label"></span>
+                <button id="pickerNextYear" class="picker-year-btn" aria-label="Next year">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+            <div class="picker-months" id="pickerMonthsGrid"></div>
+            <div class="picker-footer">
+                <button id="pickerToday" class="picker-today-btn">
+                    <span class="t-en">Today</span><span class="t-mm">ယနေ့</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── View Segment Bar (mobile only) ── -->
+    <div class="view-seg-bar" role="tablist" aria-label="Calendar view">
+        <div class="view-seg">
+            <button class="view-seg-btn" data-view="compact" role="tab">
+                <span class="t-en">Compact</span><span class="t-mm">အတိုချုပ်</span>
+            </button>
+            <button class="view-seg-btn" data-view="month" role="tab">
+                <span class="t-en">Month</span><span class="t-mm">လ</span>
+            </button>
+            <button class="view-seg-btn" data-view="list" role="tab">
+                <span class="t-en">List</span><span class="t-mm">စာရင်း</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Offline Banner ── -->
+    <div id="offlineBanner" class="offline-banner" aria-live="polite" aria-atomic="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <span class="t-en">Offline · Data may be outdated</span><span class="t-mm">အင်တာနက်မရှိ · ဒေတာဟောင်းဖြစ်နိုင်</span>
+    </div>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+
+        <!-- Month View -->
+        <section class="view-panel view-month" id="viewMonth" role="tabpanel">
+            <div class="month-grid-col">
+                <div class="weekday-header" aria-hidden="true">
+                    <div><span class="t-en">Sun</span><span class="t-mm t-mm-short">နွေ</span><span class="t-mm t-mm-full">တနင်္ဂနွေ</span></div>
+                    <div><span class="t-en">Mon</span><span class="t-mm t-mm-short">လာ</span><span class="t-mm t-mm-full">တနင်္လာ</span></div>
+                    <div><span class="t-en">Tue</span><span class="t-mm t-mm-short">ဂါ</span><span class="t-mm t-mm-full">အင်္ဂါ</span></div>
+                    <div><span class="t-en">Wed</span><span class="t-mm t-mm-short">ဟူး</span><span class="t-mm t-mm-full">ဗုဒ္ဓဟူး</span></div>
+                    <div><span class="t-en">Thu</span><span class="t-mm t-mm-short">တေး</span><span class="t-mm t-mm-full">ကြာသပတေး</span></div>
+                    <div><span class="t-en">Fri</span><span class="t-mm t-mm-short">ကြာ</span><span class="t-mm t-mm-full">သောကြာ</span></div>
+                    <div><span class="t-en">Sat</span><span class="t-mm t-mm-short">နေ</span><span class="t-mm t-mm-full">စနေ</span></div>
+                </div>
+                <div class="cal-grid" id="calendarDays" role="grid" aria-label="Calendar days"></div>
+                <div class="cal-legend">
+                    <span class="legend-item"><span class="dot dot-holiday"></span><span class="t-en">Holiday</span><span class="t-mm">ရုံးပိတ်</span></span>
+                    <span class="legend-item" id="legendCustom"><span class="dot dot-custom"></span><span class="t-en">Custom</span><span class="t-mm">ကိုယ်ပိုင်</span></span>
+                    <span class="legend-item"><span class="dot dot-fullmoon"></span><span class="t-en">Full Moon</span><span class="t-mm">လပြည့်</span></span>
+                    <span class="legend-item"><span class="dot dot-auspicious"></span><span class="t-en">Auspicious</span><span class="t-mm">မင်္ဂလာ</span></span>
+                    <span class="legend-item"><span class="dot dot-yatyaza"></span><span class="t-en">Yatyaza</span><span class="t-mm">ရက်ရာဇာ</span></span>
+                    <span class="legend-item"><span class="dot dot-pyathada"></span><span class="t-en">Pyathada</span><span class="t-mm">ပြဿဒါး</span></span>
+                </div>
+                <!-- Mobile-only holidays list (below calendar grid) -->
+                <div class="mobile-holidays-panel" id="mobileHolidaysPanel">
+                    <div class="mobile-holidays-hdr">
+                        <span class="dot dot-holiday" style="flex-shrink:0"></span>
+                        <span class="t-en">Public Holidays this Month</span>
+                        <span class="t-mm">ဤလ ရုံးပိတ်ရက်များ</span>
+                        <span class="mobile-holidays-count" id="mobileHolidaysCount"></span>
+                    </div>
+                    <div id="mobileHolidaysList"></div>
+                    <button class="mobile-holidays-toggle" id="mobileHolidaysToggle" hidden>
+                        <span class="t-en">Show all</span><span class="t-mm">အားလုံးပြရန်</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="detail-col" id="rightPane">
+                <div class="holidays-panel" id="holidaysSection">
+                    <div class="detail-hdr">
+                        <span class="detail-hdr-title"><span class="t-en">Holidays</span><span class="t-mm">ရုံးပိတ်ရက်</span></span>
+                    </div>
+                    <div class="holidays-body" id="holidaysList"></div>
+                </div>
+                <div class="day-detail-panel" id="dayDetailPanel">
+                    <div class="detail-hdr">
+                        <button class="detail-back-btn" id="ddpBack" aria-label="Back">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <span class="detail-hdr-title" id="ddpTitle"></span>
+                    </div>
+                    <div class="day-detail-body" id="ddpBody"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Compact View -->
+        <section class="view-panel view-compact" id="viewCompact" role="tabpanel">
+            <div class="compact-week-strip" id="compactWeekStrip">
+                <div class="compact-weekdays" aria-hidden="true">
+                    <span class="t-en">S</span><span class="t-mm">နွေ</span>
+                    <span class="t-en">M</span><span class="t-mm">လာ</span>
+                    <span class="t-en">T</span><span class="t-mm">ဂါ</span>
+                    <span class="t-en">W</span><span class="t-mm">ဟူး</span>
+                    <span class="t-en">T</span><span class="t-mm">တေး</span>
+                    <span class="t-en">F</span><span class="t-mm">ကြာ</span>
+                    <span class="t-en">S</span><span class="t-mm">နေ</span>
+                </div>
+                <div class="compact-week-days" id="compactWeekDays"></div>
+            </div>
+            <div class="compact-day-detail" id="compactDayDetail">
+                <div class="compact-day-hdr" id="compactDayHdr"></div>
+                <div class="compact-day-body" id="compactDayBody"></div>
+            </div>
+        </section>
+
+        <!-- List View -->
+        <section class="view-panel view-list" id="viewList" role="tabpanel">
+            <div class="list-body" id="listBody"></div>
+        </section>
+
+    </main>
+
+    <!-- Hidden compat -->
+    <span id="currentMonth" style="display:none"></span>
+    <span id="myanmarDate" style="display:none"></span>
+
+</div><!-- /.app -->
+
+<!-- Bottom Sheet Modal -->
+<div class="sheet-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="modalClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="modalTitle"></span>
+        </div>
+        <div class="sheet-body" id="dayInfo"></div>
+    </div>
+</div>
+
+<!-- Settings Page -->
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="settings-page">
+        <header class="settings-hdr">
+            <button id="settingsBack" class="settings-back-btn" aria-label="Back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="settings-title" id="settingsTitle"><span class="t-en">Settings</span><span class="t-mm">ဆက်တင်များ</span></span>
+        </header>
+        <div class="settings-body">
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">Appearance</span><span class="t-mm">အသွင်အပြင်</span></p>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🌙 Dark Mode</span><span class="t-mm">🌙 အမှောင်မုဒ်</span>
+                        </span>
+                        <button class="switch" id="darkModeSwitch" role="switch" aria-checked="false" aria-label="Dark mode">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">Language</span><span class="t-mm">ဘာသာစကား</span></p>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🌐 Language</span><span class="t-mm">🌐 ဘာသာစကား</span>
+                        </span>
+                        <div class="lang-seg settings-lang-seg" role="radiogroup" aria-label="Language">
+                            <button class="lang-seg-btn" data-lang="en" aria-pressed="true">EN</button>
+                            <button class="lang-seg-btn" data-lang="mm" aria-pressed="false">မြ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">Features</span><span class="t-mm">လုပ်ဆောင်ချက်များ</span></p>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">⏰ Alarms</span><span class="t-mm">⏰ နှိုးစက်များ</span>
+                        </span>
+                        <button class="switch" id="alarmsSwitch" role="switch" aria-checked="true" aria-label="Alarms">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">Notes &amp; Categories</span><span class="t-mm">မှတ်စုနှင့် အမျိုးအစားများ</span></p>
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">📋 Notes</span><span class="t-mm">📋 မှတ်စုများ</span>
+                        </span>
+                        <button class="switch" id="notesSwitch" role="switch" aria-checked="true" aria-label="Notes">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🗂️ Categories</span><span class="t-mm">🗂️ အမျိုးအစားများ</span>
+                        </span>
+                        <button class="switch" id="categoriesSwitch" role="switch" aria-checked="true" aria-label="Note categories">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                    <button class="settings-nav-row" id="manageCatsBtn" type="button">
+                        <span class="settings-nav-label">
+                            <span class="t-en">Manage Categories</span><span class="t-mm">အမျိုးအစားများ စီမံရန်</span>
+                        </span>
+                        <svg class="settings-nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">Data</span><span class="t-mm">ဒေတာ</span></p>
+                <div class="settings-card">
+                    <button class="settings-nav-row" id="analyticsBtn" type="button">
+                        <span class="settings-nav-label">
+                            <span class="t-en">📊 Analytics</span><span class="t-mm">📊 စာရင်းအင်း</span>
+                        </span>
+                        <svg class="settings-nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button class="settings-nav-row" id="holidaysBtn" type="button">
+                        <span class="settings-nav-label">
+                            <span class="t-en">📅 Custom Days</span><span class="t-mm">📅 ကိုယ်ပိုင် နေ့များ</span>
+                        </span>
+                        <svg class="settings-nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">👁️ Hide Empty Days in List</span><span class="t-mm">👁️ စာရင်းတွင် ဒေတာမရှိသော နေ့များ ဝှက်ရန်</span>
+                        </span>
+                        <button class="switch" id="hideEmptyListSwitch" role="switch" aria-checked="true" aria-label="Hide empty days in list">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                    <button class="settings-nav-row" id="storageBtn" type="button">
+                        <span class="settings-nav-label">
+                            <span class="t-en">💾 Storage</span><span class="t-mm">💾 သိုလှောင်မှု</span>
+                        </span>
+                        <span class="storage-nav-summary" id="storageNavSummary">0 B · 0</span>
+                        <svg class="settings-nav-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="settings-group">
+                <p class="settings-group-hdr"><span class="t-en">About</span><span class="t-mm">အကြောင်း</span></p>
+                <div class="settings-card">
+                    <div class="about-hero">
+                        <img class="about-logo" src="icon.png" alt="Myanmar Calendar logo">
+                        <div class="about-name"><span class="t-en">Myanmar Calendar</span><span class="t-mm">မြန်မာပြက္ခဒိန်</span></div>
+                        <div class="about-version" id="aboutVersion">v1.0.0</div>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">👨‍💻 Developer</span><span class="t-mm">👨‍💻 တီထွင်သူ</span>
+                        </span>
+                        <span class="about-value">Okkar Thet Naing</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🏢 Company</span><span class="t-mm">🏢 ကုမ္ပဏီ</span>
+                        </span>
+                        <span class="about-value">GoeTecX</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🌐 Website</span><span class="t-mm">🌐 ဝက်ဘ်ဆိုက်</span>
+                        </span>
+                        <a class="about-link" href="https://goetecx.com" target="_blank" rel="noopener">goetecx.com</a>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">📱 App Version</span><span class="t-mm">📱 အက်ပ် ဗားရှင်း</span>
+                        </span>
+                        <span class="about-value" id="aboutVersionRow">1.0.0</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🗄️ Cache Version</span><span class="t-mm">🗄️ ကက်ရှ် ဗားရှင်း</span>
+                        </span>
+                        <span class="about-value" id="aboutCacheRow">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manage Categories Sheet -->
+<div class="sheet-overlay sheet-over-top" id="catSheet" role="dialog" aria-modal="true" aria-labelledby="catSheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="catSheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="catSheetTitle"><span class="t-en">Manage Categories</span><span class="t-mm">အမျိုးအစားများ စီမံရန်</span></span>
+        </div>
+        <div class="sheet-body">
+            <div class="note-cats-list" id="noteCatsList"></div>
+            <button class="custom-holiday-add" id="noteCatAdd" type="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span class="t-en">Add Category</span><span class="t-mm">အမျိုးအစား ထည့်ရန်</span>
+            </button>
+            <div class="note-cat-form" id="noteCatForm" hidden>
+                <div class="ch-field">
+                    <label class="ch-field-label"><span class="t-en">Name (EN)</span><span class="t-mm">အမည် (အင်္ဂလိပ်)</span></label>
+                    <input type="text" class="ch-input" id="ncNameEn" maxlength="40" placeholder="e.g. Work">
+                </div>
+                <div class="ch-field">
+                    <label class="ch-field-label"><span class="t-en">Name (မြန်မာ)</span><span class="t-mm">အမည် (မြန်မာ)</span></label>
+                    <input type="text" class="ch-input" id="ncNameMm" maxlength="40" placeholder="ဥပမာ — အလုပ်">
+                </div>
+                <div class="ch-field" id="ncTypeField">
+                    <label class="ch-field-label"><span class="t-en">Data Type</span><span class="t-mm">ဒေတာ အမျိုးအစား</span></label>
+                    <div class="nc-type-chips" id="ncTypeChips"></div>
+                </div>
+                <div class="ch-field" id="ncUnitField" hidden>
+                    <label class="ch-field-label"><span class="t-en">Unit</span><span class="t-mm">ယူနစ်</span></label>
+                    <input type="text" class="ch-input" id="ncUnit" maxlength="10" placeholder="e.g. MMK, hr, kg">
+                </div>
+                <div class="ch-field" id="ncAggField" hidden>
+                    <label class="ch-field-label"><span class="t-en">Calculation</span><span class="t-mm">တွက်နည်း</span></label>
+                    <div class="nc-agg-chips" id="ncAggChips"></div>
+                    <div class="nc-sign-row" id="ncSignRow" hidden>
+                        <span class="nc-sign-label"><span class="t-en">Direction</span><span class="t-mm">ဦးတည်ချက်</span></span>
+                        <div class="nc-sign-seg">
+                            <button type="button" class="nc-sign-btn" data-sign="1"><span class="t-en">Income +</span><span class="t-mm">ဝင်ငွေ +</span></button>
+                            <button type="button" class="nc-sign-btn" data-sign="-1"><span class="t-en">Expense −</span><span class="t-mm">ထွက်ငွေ −</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="note-form-actions">
+                    <button type="button" class="note-cancel-btn" id="ncCancel"><span class="t-en">Cancel</span><span class="t-mm">မလုပ်တော့</span></button>
+                    <button type="button" class="note-save-btn" id="ncSave"><span class="t-en">Add</span><span class="t-mm">ထည့်မည်</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Days Sheet -->
+<div class="sheet-overlay sheet-over-top" id="holidaySheet" role="dialog" aria-modal="true" aria-labelledby="holidaySheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="holidaySheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="holidaySheetTitle"><span class="t-en">Custom Days</span><span class="t-mm">ကိုယ်ပိုင် နေ့များ</span></span>
+        </div>
+        <div class="sheet-body">
+            <div class="custom-holidays-list" id="customHolidaysList"></div>
+            <button class="custom-holiday-add" id="customHolidayAdd" type="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span class="t-en">Add Day</span><span class="t-mm">နေ့ ထည့်ရန်</span>
+            </button>
+            <div class="custom-holiday-form" id="customHolidayForm" hidden>
+                <div class="ch-field">
+                    <label class="ch-field-label"><span class="t-en">Type</span><span class="t-mm">အမျိုးအစား</span></label>
+                    <div class="ch-type-chips" id="chTypeChips"></div>
+                </div>
+                <div class="ch-field">
+                    <label class="ch-field-label"><span class="t-en">Name (EN)</span><span class="t-mm">အမည် (အင်္ဂလိပ်)</span></label>
+                    <input type="text" class="ch-input" id="chNameEn" maxlength="60" placeholder="e.g. My Birthday">
+                </div>
+                <div class="ch-field">
+                    <label class="ch-field-label"><span class="t-en">Name (မြန်မာ)</span><span class="t-mm">အမည် (မြန်မာ)</span></label>
+                    <input type="text" class="ch-input" id="chNameMm" maxlength="60" placeholder="ဥပမာ — မွေးနေ့">
+                </div>
+                <div class="ch-date-section">
+                    <label class="ch-field-label"><span class="t-en">Date</span><span class="t-mm">ရက်စွဲ</span></label>
+                    <div class="ch-month-chips" id="chMonthChips"></div>
+                    <div class="ch-day-stepper">
+                        <button type="button" class="ch-step-btn" id="chDayMinus" aria-label="Previous day">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <div class="ch-day-display">
+                            <span class="ch-day-num" id="chDayNum">23</span>
+                            <span class="ch-day-unit"><span class="t-en">Day</span><span class="t-mm">ရက်</span></span>
+                        </div>
+                        <button type="button" class="ch-step-btn" id="chDayPlus" aria-label="Next day">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="ch-recurring-row">
+                    <span class="ch-recurring-label">
+                        <span class="t-en">🔁 Every year</span><span class="t-mm">🔁 နှစ်စဉ်</span>
+                    </span>
+                    <button class="switch" id="chRecurring" role="switch" aria-checked="true" aria-label="Every year">
+                        <span class="switch-thumb"></span>
+                    </button>
+                </div>
+                <div class="note-form-actions">
+                    <button type="button" class="note-cancel-btn" id="chCancel"><span class="t-en">Cancel</span><span class="t-mm">မလုပ်တော့</span></button>
+                    <button type="button" class="note-save-btn" id="chSave"><span class="t-en">Save</span><span class="t-mm">သိမ်းမည်</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Sheet -->
+<div class="sheet-overlay sheet-over-top" id="analyticsSheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="analyticsSheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="analyticsSheetTitle"><span class="t-en">Analytics</span><span class="t-mm">စာရင်းအင်း</span></span>
+            <button id="analyticsDetailBtn" class="analytics-detail-btn" aria-label="Detail analytics">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </button>
+        </div>
+        <div class="sheet-body">
+            <div class="analytics-hdr">
+                <span class="analytics-period" id="analyticsPeriod"></span>
+            </div>
+            <div class="analytics-body" id="analyticsBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Storage Sheet -->
+<div class="sheet-overlay sheet-over-top" id="storageSheet" role="dialog" aria-modal="true" aria-labelledby="storageSheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="storageSheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="storageSheetTitle"><span class="t-en">💾 Storage</span><span class="t-mm">💾 သိုလှောင်မှု</span></span>
+        </div>
+        <div class="sheet-body">
+            <div class="storage-summary">
+                <div class="storage-summary-item">
+                    <span class="storage-summary-num" id="storageUsed">0 B</span>
+                    <span class="storage-summary-label"><span class="t-en">Used</span><span class="t-mm">သုံးထား</span></span>
+                </div>
+                <div class="storage-summary-item">
+                    <span class="storage-summary-num" id="storageCount">0</span>
+                    <span class="storage-summary-label"><span class="t-en">Files</span><span class="t-mm">ဖိုင်များ</span></span>
+                </div>
+            </div>
+
+            <div class="storage-limit-block">
+                <span class="storage-limit-label"><span class="t-en">Max File Size</span><span class="t-mm">ဖိုင် အများဆုံး အရွယ်</span></span>
+                <div class="storage-chips" id="maxSizeChips"></div>
+            </div>
+            <div class="storage-limit-block">
+                <span class="storage-limit-label"><span class="t-en">Max Attachments per Note</span><span class="t-mm">မှတ်စုတစ်ခုလျှင် ဖိုင် အများဆုံး</span></span>
+                <div class="storage-chips" id="maxCountChips"></div>
+            </div>
+
+            <div class="storage-files-hdr">
+                <span class="storage-files-title"><span class="t-en">All Attachments</span><span class="t-mm">ဖိုင်အားလုံး</span></span>
+            </div>
+            <div class="storage-files-list" id="storageFilesList"></div>
+
+            <button class="storage-clear-all" id="clearAttachmentsBtn" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                <span class="t-en">Clear All Attachments</span><span class="t-mm">ဖိုင်အားလုံး ရှင်းရန်</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Dashboard Page (full screen) -->
+<div class="analytics-page-overlay" id="analyticsPage" role="dialog" aria-modal="true" aria-labelledby="analyticsPageTitle">
+    <div class="analytics-page">
+        <header class="analytics-page-hdr">
+            <button id="analyticsPageBack" class="settings-back-btn" aria-label="Back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="analytics-page-title" id="analyticsPageTitle"><span class="t-en">📊 Analytics Dashboard</span><span class="t-mm">📊 စာရင်းအင်း ဒက်ရှ်ဘုတ်</span></span>
+        </header>
+        <div class="analytics-page-body">
+            <!-- Range selector -->
+            <div class="dash-range-row">
+                <span class="dash-range-label"><span class="t-en">Range</span><span class="t-mm">ကာလ</span></span>
+                <div class="dash-range-chips" id="dashRangeChips">
+                    <button type="button" class="dash-range-chip active" data-range="month"><span class="t-en">This Month</span><span class="t-mm">ဤလ</span></button>
+                    <button type="button" class="dash-range-chip" data-range="lastmonth"><span class="t-en">Last Month</span><span class="t-mm">ယခင်လ</span></button>
+                    <button type="button" class="dash-range-chip" data-range="year"><span class="t-en">This Year</span><span class="t-mm">ဤနှစ်</span></button>
+                    <button type="button" class="dash-range-chip" data-range="all"><span class="t-en">All Time</span><span class="t-mm">အားလုံး</span></button>
+                </div>
+            </div>
+
+            <!-- Summary cards -->
+            <div class="dash-cards" id="dashCards"></div>
+
+            <!-- Category breakdown -->
+            <div class="dash-section">
+                <p class="dash-section-hdr"><span class="t-en">Category Breakdown</span><span class="t-mm">အမျိုးအစား ခွဲခြမ်းစိတ်ဖြာမှု</span></p>
+                <div class="dash-card" id="dashCategoryBreakdown"></div>
+            </div>
+
+            <!-- 360° analytics -->
+            <div class="dash-section">
+                <p class="dash-section-hdr"><span class="t-en">360° Analytics</span><span class="t-mm">360° စာရင်းအင်း</span></p>
+                <div class="dash-card" id="dash360"></div>
+            </div>
+
+            <!-- Monthly trend -->
+            <div class="dash-section">
+                <p class="dash-section-hdr"><span class="t-en">Monthly Trend</span><span class="t-mm">လစဉ် လမ်းကြောင်း</span></p>
+                <div class="dash-card" id="dashTrend"></div>
+            </div>
+
+            <!-- All notes in range -->
+            <div class="dash-section">
+                <p class="dash-section-hdr"><span class="t-en">All Notes</span><span class="t-mm">မှတ်စုအားလုံး</span></p>
+                <div class="dash-card" id="dashNotesList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="mmcal.js"></script>
+<script src="holidays.js"></script>
+<script src="app.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        // Register SW after page load to avoid competing with initial resource fetch
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                // When a new SW is waiting, activate it immediately on next navigation
+                // (avoids users being stuck on old shell for a full browser close/reopen)
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New shell is ready — send skipWaiting to activate now
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    });
+                });
+            }).catch(() => { /* SW not supported in this context */ });
+
+            // When a new SW takes control, reload the page to get the fresh shell
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
+        });
+    }
+</script>
+</body>
+</html>
