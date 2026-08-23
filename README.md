@@ -4,6 +4,8 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 
 မြန်မာဘာသာ + အင်္ဂလိပ်ဘာသာ iOS 26 Liquid Glass ဒီဇိုင်း PWA၊ Gregory နှင့် မြန်မာ ပြက္ခဒိန် နှစ်မျိုးစလုံး၊ ပြည်သူ့ရုံးပိတ်ရက်များ၊ လဆုပ်လဆန်း၊ နက္ခတ်ဗေဒင် အချက်အလက်များ offline ဖော်ပြသည့် ဝက်ဘ်အက်ပ်ဖြစ်သည်။
 
+**Version:** 1.0.0 · **Developer:** Okkar Thet Naing · **Company:** GoeTecX
+
 ---
 
 ## Features · လုပ်ဆောင်ချက်များ
@@ -17,6 +19,14 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | ☸️ Sabbath | Sabbath (ဥပုသ်) marker with ☸️ icon | ဥပုသ်နေ့ ☸️ သင်္ကေတ |
 | 🌈 Yatyaza | Yatyaza (ရက်ရာဇာ) caution marker with 🌈 icon | ရက်ရာဇာနေ့ 🌈 သင်္ကေတ |
 | ⚠️ Auspicious Days | Yatyaza, Pyathada, Sabbath, Thamaphyu & more | ရက်ရာဇာ, ပြဿဒါး, ဥပုသ်, သမားဖြူ စသည် |
+| ⚙️ Settings Page | Dark mode, language, feature toggles, storage, about | ဆက်တင်များ — အမှောင်/အလင်း၊ ဘာသာ၊ လုပ်ဆောင်ချက် |
+| 📋 Notes | Per-day notes with icons, colors, categories & attachments | နေ့အလိုက် မှတ်စုများ |
+| 🗂️ Note Categories | Main + sub categories with data types (amount/time/length/weight) | မှတ်စု အမျိုးအစားများ |
+| 🧮 Aggregation Modes | Sum / Net (±) / Last / Average per sub-category | တွက်နည်း — စုစုပေါင်း/အသားတင်/နောက်ဆုံး/ပျမ်းမျှ |
+| 📎 Attachments | Multiple files per note, stored client-side in IndexedDB | ဖိုင်များ — ကိုယ်ပိုင် သိုလှောင်မှု |
+| 📊 Analytics | Per-category totals + full dashboard with date ranges & 360° view | စာရင်းအင်း ဒက်ရှ်ဘုတ် |
+| 📅 Custom Days | User-defined days: Holiday, Birthday, Anniversary, Event, Reminder | ကိုယ်ပိုင် နေ့များ |
+| 💾 Storage Manager | Usage, per-file limits, attachment list with thumbnails, clear all | သိုလှောင်မှု စီမံခန့်ခွဲမှု |
 | 🌙 Dark / Light Mode | Persistent theme toggle in unified glass capsule | မှောင်မိုက် / အလင်း မုဒ်ပြောင်းနိုင် |
 | 🌐 Language Toggle | EN / မြ segmented control | ဘာသာစကား ပြောင်းလဲနိုင် |
 | 📱 Responsive | Mobile · Tablet · Desktop layouts | မိုဘိုင်း · တက်ဘလက် · ဒက်စ်တော့ |
@@ -25,6 +35,118 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | 🗓️ Month Picker | Scrollable iOS-style year + month picker popover | လနှင့်နှစ် ရွေးချယ်ပေးနိုင် |
 | 🔖 Dynamic Favicon | Tab icon updates daily to show today's date | ဘရောက်ဇာ တက်ဘ်တွင် ယနေ့ရက်ဖော်ပြ |
 | ⏰ Midnight Refresh | Today highlight + favicon auto-update at midnight | သန်းခေါင်တွင် ယနေ့ ရက်အလိုအလျောက်ပြောင်း |
+| 👆 Swipe Navigation | Swipe left/right to change month (or week in Compact view) | ဘေးတိုက် ပွတ်ဆွဲ၍ လပြောင်းနိုင် |
+| 📏 Week Separators | Thin lines between calendar weeks for readability | ရက်သတ္တပတ် ခြားမျဉ်းများ |
+
+---
+
+## Settings · ဆက်တင်များ
+
+Opened via the ⚙️ gear icon in the nav bar. Compact iOS-style page with bottom sheets:
+
+| Section | Contents |
+|---|---|
+| **Appearance** | 🌙 Dark Mode toggle |
+| **Language** | EN / မြ segmented control |
+| **Features** | ⏰ Alarms toggle |
+| **Notes & Categories** | 📋 Notes toggle · 🗂️ Categories toggle · **Manage Categories** sheet |
+| **Data** | 📊 Analytics sheet · 📅 Custom Days sheet · 👁️ Hide Empty Days in List toggle |
+| **Storage** | 💾 Storage sheet — usage, limits, all attachments with thumbnails, clear all |
+| **About** | App logo, version, developer (Okkar Thet Naing), company (GoeTecX), website |
+
+All management functions open in **iOS bottom sheets** (Liquid Glass) so the settings page stays compact.
+
+---
+
+## Notes · မှတ်စုများ
+
+Each day can have multiple notes with:
+- **Text** + emoji icon + color
+- **Category** (main) + **Sub-category** — optional, from your own category tree
+- **Value** — when the sub-category has a data type (e.g. 💰 50,000 MMK)
+- **Attachments** — multiple files per note (see below)
+
+Calendar cells show note badges: the **data-type icon** (💰/⏱️/📏/⚖️) for typed notes, up to 2 badges + "+N" count for multiple notes.
+
+### Note Categories · မှတ်စု အမျိုးအစားများ
+
+Fully user-managed (Settings → Manage Categories):
+- **Main categories** (e.g. Work, Personal, Finance) with **sub-categories** (e.g. Meeting, Health, Income)
+- Each sub-category can have a **data type** with a customizable unit:
+
+| Type | Icon | Default Unit | Example |
+|---|---|---|---|
+| None | 📝 | — | Task, Family |
+| Amount | 💰 | MMK | Income, Expense |
+| Time | ⏱️ | hr | Meeting |
+| Length | 📏 | m | Distance |
+| Weight | ⚖️ | kg | Health |
+
+- **Aggregation mode** per sub-category:
+
+| Mode | Icon | Meaning |
+|---|---|---|
+| Sum | ∑ | Total of all values |
+| Net | ± | Signed total (Income + / Expense −) |
+| Last | ↗ | Latest value only (e.g. weight) |
+| Average | ∅ | Mean of values |
+
+- **Hide/Show** (eye button) — hide a category without deleting it; hidden items disappear from pickers & analytics
+- Categories are stored in `localStorage` (`mm-note-categories`)
+
+### Attachments · ဖိုင်များ
+
+- Multiple files per note, stored **client-side in IndexedDB** (`mm-attachments`) — never uploaded
+- Note stores only metadata (name, type, size) in `localStorage`
+- **Viewer**: images → lightbox · text files → inline preview · PDF → embedded viewer · others → file card
+- All with a **Download** button
+- Smart file-type icons: 🖼️ 🎬 🎵 📄 📝 📊 🗜️ 📃 📎
+
+---
+
+## Analytics · စာရင်းအင်း
+
+### Sheet (Settings → Data → Analytics)
+Per-typed-sub-category totals with aggregation modes applied, this-month + all-time, entry counts.
+
+### Dashboard (📊 button in the sheet)
+Full-page analytics with:
+- **Range selector** — This Month / Last Month / This Year / All Time
+- **Summary cards** — Notes, Entries, Net Amount, Categories
+- **Category Breakdown** — per main category with sub-category values
+- **360° Analytics** — Top categories (by computed value) + Type totals (Amount/Time/Length/Weight)
+- **Monthly Trend** — 6-month bar chart
+- **All Notes** — full list in range with category + value badges
+
+---
+
+## Custom Days · ကိုယ်ပိုင် နေ့များ
+
+User-defined special days (Settings → Data → Custom Days), shown on the calendar with a type icon badge + indigo dot:
+
+| Type | Icon | မြန်မာ |
+|---|---|---|
+| Holiday | 🎌 | ရုံးပိတ် |
+| Birthday | 🎂 | မွေးနေ့ |
+| Anniversary | 💍 | နှစ်ပတ်လည် |
+| Event | 🎉 | ပွဲ |
+| Reminder | ⏰ | သတိပေးချက် |
+| Other | 📌 | အခြား |
+
+Each day: name (EN + မြန်မာ), date (month chips + day stepper), recurring (every year) toggle. Stored in `localStorage` (`mm-custom-holidays`).
+
+---
+
+## Storage · သိုလှောင်မှု
+
+Settings → Storage sheet:
+- **Usage summary** — total bytes + file count (live)
+- **Max File Size** — 1/5/10/25/50 MB/∞ (default 10 MB)
+- **Max Attachments per Note** — 3/5/10/20/∞ (default 10)
+- **All Attachments** — every file across all notes with **image thumbnails**, view + delete per file
+- **Clear All Attachments** — one-tap wipe with confirmation
+
+Limits are enforced at pick time with bilingual toasts.
 
 ---
 
@@ -34,7 +156,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 - Full-screen edge-to-edge calendar grid
 - **Public Holidays card** shown below the calendar grid for the current month
 - Tap a day → full-screen slide-in Day Detail panel
-- Sticky Liquid Glass nav bar: prev arrow · Today button · month/year title · Dark/Lang capsule · next arrow
+- Sticky Liquid Glass nav bar: prev arrow · Today button · month/year title · Settings gear · next arrow
 - Moon phase pill badge anchored to top-right of each date circle
 - Dot indicators per cell: holiday · full moon · auspicious · yatyaza · pyathada
 - 3-view segmented switcher (Month / Compact / List)
@@ -47,6 +169,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 - Mobile holidays card is hidden (right panel handles it)
 - Larger day cells (38 × 38 px circle), 18 px date number, 12 px Myanmar date
 - Weekday header shows **full Myanmar day names** (တနင်္ဂနွေ, တနင်္လာ, အင်္ဂါ…)
+- Calendar adapts to column width via container queries (no overlap at any size)
 
 ---
 
@@ -54,13 +177,13 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 
 ### English Mode (EN)
 ```
-[ ‹ ] [ Today ]   April 2026 ↓    [ ☀/🌙 | EN  မြ ] [ › ]
+[ ‹ ] [ Today ]   April 2026 ↓    [ ⚙️ ] [ › ]
                   Tagu / Kason · 1387-1388
 ```
 
 ### Myanmar Mode (မြ)
 ```
-[ ‹ ] [ ယနေ့ ]   တန်ခူး / ကဆုန် · ၁၃၈၇-၁၃၈၈ ↓    [ ☀/🌙 | EN  မြ ] [ › ]
+[ ‹ ] [ ယနေ့ ]   တန်ခူး / ကဆုန် · ၁၃၈၇-၁၃၈၈ ↓    [ ⚙️ ] [ › ]
                   ဧပြီ ၂၀၂၆
 ```
 
@@ -83,10 +206,10 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 
 ## Day Detail Panel · နေ့ရက် အချက်အလက်
 
-Each day displays 5 fully bilingual sections. EN mode uses English throughout; MM mode uses Myanmar throughout.
+Each day displays fully bilingual sections. EN mode uses English throughout; MM mode uses Myanmar throughout.
 
 ### 1. Holidays · ရုံးပိတ်ရက်
-Public holiday name (bilingual) with optional description.
+Public holiday name (bilingual) with optional description. Custom days show their type icon (🎂 etc.).
 
 ### 2. Myanmar Calendar · မြန်မာပြက္ခဒိန်
 
@@ -138,6 +261,12 @@ Public holiday name (bilingual) with optional description.
 | ⛔ | Mahayatkyan | မဟာရက်ကြမ်း |
 | ⚠️ | Shanyat | ရှမ်းရက် |
 
+### 6. Notes · မှတ်စုများ
+Add/view notes with category badges, value badges, and attachment chips.
+
+### 7. Alarms · နှိုးစက်များ
+Per-day alarms with time, label, toggle, and delete.
+
 ---
 
 ## List View · စာရင်းမြင်ကွင်း
@@ -146,6 +275,8 @@ Public holiday name (bilingual) with optional description.
 |---|---|
 | **EN** | `Late Tagu Full Moon 15` |
 | **MM** | `နောက်ဆုံးတန်ခူး လပြည့် ၁၅ ရက်` |
+
+Optionally **hide empty days** (no events) via Settings → Data → Hide Empty Days in List.
 
 ---
 
@@ -156,6 +287,7 @@ Public holiday name (bilingual) with optional description.
 - **Glass surfaces** — nav bar, picker, controls use `backdrop-filter: blur()` + `saturate()` + semi-transparent backgrounds
 - **Glass capsule controls** — frosted glass with glass-border and glow shadows
 - **Specular highlights** — inset box-shadow on nav bar simulates a glass top edge
+- **Bottom sheets** — settings management, day detail, storage, analytics all use slide-up glass sheets
 
 ### Color Tokens
 
@@ -166,6 +298,7 @@ Public holiday name (bilingual) with optional description.
 | `--ios-green` | `#34C759` | `#30D158` |
 | `--ios-orange` | `#FF9500` | `#FF9F0A` |
 | `--ios-teal` | `#30B0C7` | `#40C8E0` |
+| `--ios-indigo` | `#5856D6` | `#5E5CE6` |
 | `--bg` | `#F2F2F7` | `#000000` |
 | `--surface` | `#FFFFFF` | `#1C1C1E` |
 | `--cal-day-en` | `rgba(0,0,0,0.88)` | `rgba(255,255,255,0.92)` |
@@ -183,17 +316,18 @@ Public holiday name (bilingual) with optional description.
 | `< 390px` | Small phone — reduced nav, dots, text |
 | `< 768px` | Mobile — compact nav, short MM day names |
 | `≥ 768px` | Desktop — full nav, full MM day names, two-column layout |
+| `@container ≤ 520px` | Narrow calendar column — scaled cells (no overlap) |
 
 ---
 
 ## File Structure · ဖိုင်ဖွဲ့စည်းပုံ
 
 ```
-├── index.html          — PWA shell, semantic HTML
+├── index.html          — PWA shell, semantic HTML, settings + sheets
 ├── style.css           — iOS 26 Liquid Glass design system
-├── app.js              — Calendar rendering, views, event handling
+├── app.js              — Calendar rendering, views, notes, categories, analytics, storage
 ├── mmcal.js            — Myanmar calendar calculation engine (JDN, astrology)
-├── holidays.js         — Holiday loader (parses holidays.json)
+├── holidays.js         — Holiday loader (parses holidays.json + custom days)
 ├── holidays.json       — Holiday data: fixed annual + year-specific entries
 ├── sw.js               — Service Worker (cache-first + background refresh)
 ├── manifest.json       — PWA web app manifest
@@ -201,6 +335,25 @@ Public holiday name (bilingual) with optional description.
 ├── generate-icon.html  — Browser tool to regenerate the app icon
 └── icon.png            — PWA app icon (192 × 192)
 ```
+
+---
+
+## Client-Side Storage · ကိုယ်ပိုင် သိုလှောင်မှု
+
+| Storage | Key | Contents |
+|---|---|---|
+| `localStorage` | `mm-theme` | Dark/light mode |
+| `localStorage` | `mm-lang` | EN/မြ language |
+| `localStorage` | `mm-view` | Month/Compact/List view |
+| `localStorage` | `mm-notes` | Notes (text, icon, color, category, value, attachment metadata) |
+| `localStorage` | `mm-note-categories` | Category tree (main + subs, types, units, aggregation) |
+| `localStorage` | `mm-custom-holidays` | Custom days (name, date, type, recurring) |
+| `localStorage` | `mm-alarms` | Per-day alarms |
+| `localStorage` | `mm-notes-enabled` / `mm-alarms-enabled` / `mm-note-categories-enabled` | Feature toggles |
+| `localStorage` | `mm-attach-max-size` / `mm-attach-max-count` | Storage limits |
+| `IndexedDB` | `mm-attachments` | Attachment file blobs |
+
+All data stays **on the client device** — nothing is uploaded.
 
 ---
 
@@ -274,7 +427,7 @@ Edit `holidays.json` to add or update holidays:
 ## Running Locally · ဒေသတွင်း စမ်းသပ်ခြင်း
 
 ```bash
-cd mmclaendar_swift
+cd mmclaendar_pwa
 python3 -m http.server 8080
 # open http://localhost:8080
 ```
