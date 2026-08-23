@@ -609,25 +609,42 @@
         // Register SW after page load to avoid competing with initial resource fetch
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').then(reg => {
-                // When a new SW is waiting, activate it immediately on next navigation
-                // (avoids users being stuck on old shell for a full browser close/reopen)
+                // When a new SW is installed, show a visible "Update available" banner
+                // so the user knows a new version is ready and can tap to apply it.
                 reg.addEventListener('updatefound', () => {
                     const newWorker = reg.installing;
                     if (!newWorker) return;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // New shell is ready — send skipWaiting to activate now
-                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            showUpdateBanner(newWorker);
                         }
                     });
                 });
             }).catch(() => { /* SW not supported in this context */ });
 
-            // When a new SW takes control, reload the page to get the fresh shell
+            // When the new SW takes control, reload to get the fresh shell
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 window.location.reload();
             });
         });
+
+        // ── "Update available" banner ─────────────────────────────
+        function showUpdateBanner(newWorker) {
+            let banner = document.getElementById('updateBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'updateBanner';
+                banner.className = 'update-banner';
+                banner.innerHTML = `
+                    <span class="update-banner-text">🔄 <span class="t-en">New version available</span><span class="t-mm">ဗားရှင်းအသစ် ရနေပါပြီ</span></span>
+                    <button class="update-banner-btn" type="button"><span class="t-en">Update</span><span class="t-mm">အပ်ဒိတ်</span></button>`;
+                document.body.appendChild(banner);
+                banner.querySelector('.update-banner-btn').addEventListener('click', () => {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                });
+            }
+            requestAnimationFrame(() => banner.classList.add('show'));
+        }
     }
 </script>
 </body>

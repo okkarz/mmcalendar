@@ -3697,6 +3697,51 @@ html[data-view="list"]    .view-list    { display: flex; }
 .note-save-btn:hover { opacity: 0.82; }
 
 /* ═══════════════════════════════════════════════════════
+   UPDATE BANNER — new version available
+   ═══════════════════════════════════════════════════════ */
+.update-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    z-index: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px 10px 16px;
+    border-radius: var(--r-full);
+    background: var(--glass-bg-heavy);
+    backdrop-filter: saturate(220%) blur(var(--glass-blur-heavy));
+    -webkit-backdrop-filter: saturate(220%) blur(var(--glass-blur-heavy));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-xl), var(--glass-glow);
+    max-width: calc(100vw - 32px);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.update-banner.show { transform: translateX(-50%) translateY(0); }
+.update-banner-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.update-banner-btn {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: var(--r-full);
+    background: var(--ios-blue);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(0,122,255,0.35);
+    transition: opacity 0.15s, transform 0.15s;
+}
+.update-banner-btn:hover  { opacity: 0.88; }
+.update-banner-btn:active { transform: scale(0.94); }
+
+/* ═══════════════════════════════════════════════════════
    OFFLINE BANNER
    ═══════════════════════════════════════════════════════ */
 .offline-banner {
