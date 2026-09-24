@@ -4,7 +4,7 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 
 မြန်မာဘာသာ + အင်္ဂလိပ်ဘာသာ iOS 26 Liquid Glass ဒီဇိုင်း PWA၊ Gregory နှင့် မြန်မာ ပြက္ခဒိန် နှစ်မျိုးစလုံး၊ ပြည်သူ့ရုံးပိတ်ရက်များ၊ လဆုပ်လဆန်း၊ နက္ခတ်ဗေဒင် အချက်အလက်များ offline ဖော်ပြသည့် ဝက်ဘ်အက်ပ်ဖြစ်သည်။
 
-**Version:** 3.0.4 · **Developer:** Okkar Thet Naing · **Company:** GoeTecX
+**Version:** 3.4.0 · **Developer:** Okkar Thet Naing · **Company:** GoeTecX
 
 ---
 
@@ -28,7 +28,8 @@ A bilingual Myanmar–English Progressive Web App (PWA) with an iOS 26 Liquid Gl
 | 📅 Custom Days | User-defined days: Holiday, Birthday, Anniversary, Event, Reminder | ကိုယ်ပိုင် နေ့များ |
 | 💾 Storage Manager | Usage, per-file limits, attachment list with thumbnails, clear all | သိုလှောင်မှု စီမံခန့်ခွဲမှု |
 | 🌓 System / Light / Dark Theme | Follows OS preference, or force light/dark — persistent | စနစ် / အလင်း / အမှောင် အပြင်အဆင် |
-| 🌐 Language Toggle | EN / မြ segmented control | ဘာသာစကား ပြောင်းလဲနိုင် |
+| � Saturday in Red | Saturday's date rendered red like Sunday — toggle in Settings → Appearance | စနေနေ့ကိုလည်း အနီရောင် ဖော်ပြရန် (ဆက်တင် → အသွင်အပြင်) || 🏢 Substitute Working Days | ကြားရက် bridge holidays come with worked Saturdays — shown black with a 🏢 badge and the reason on tap | အစားထိုး ရုံးတက်ရက် — အနီရောင် မပြဘဲ အကြောင်းရင်း ဖော်ပြသည် |
+| 🎉 Fun for Employee | Counts down to the next N-day break (consecutive red days) — shown as card, toast or popup | နောက် N ရက် အနားယူရက် အထိ ရေတွက်ပေးသည် || 🌐 Language Toggle | EN / မြ segmented control | ဘာသာစကား ပြောင်းလဲနိုင် |
 | 📱 Responsive | Mobile · Tablet · Desktop layouts | မိုဘိုင်း · တက်ဘလက် · ဒက်စ်တော့ |
 | 📲 PWA | Installable, offline-capable via Service Worker | အင်တာနက်မပါဘဲ အသုံးပြုနိုင် |
 | 🗓️ 3-View Mode | Month · Compact · List views | လ / အတိုချုပ် / စာရင်း မြင်ကွင်းများ |
@@ -46,9 +47,9 @@ Opened via the ⚙️ gear icon in the nav bar. Compact iOS-style page with bott
 
 | Section | Contents |
 |---|---|
-| **Appearance** | � Theme segmented control — System (follows OS) / Light / Dark |
+| **Appearance** | 📕 Theme segmented control — System (follows OS) / Light / Dark · Saturday in Red toggle · Substitute Working Days toggle |
 | **Language** | EN / မြ segmented control |
-| **Features** | ⏰ Alarms toggle |
+| **Features** | ⏰ Alarms toggle · 🎉 Fun for Employee (days-off countdown — days, display mode, custom title with `{n}`) |
 | **Notes & Categories** | 📋 Notes toggle · 🗂️ Categories toggle · **Manage Categories** sheet |
 | **Data** | 📊 Analytics sheet · 📅 Custom Days sheet · 👁️ Hide Empty Days in List toggle |
 | **Storage** | 💾 Storage sheet — usage, limits, all attachments with thumbnails, clear all |
@@ -329,7 +330,9 @@ Optionally **hide empty days** (no events) via Settings → Data → Hide Empty 
 ├── mmcal.js            — Myanmar calendar calculation engine (JDN, astrology)
 ├── holidays.js         — Holiday loader (parses holidays.json + custom days)
 ├── holidays.json       — Holiday data: fixed annual + year-specific entries
-├── sw.js               — Service Worker (cache-first + background refresh)
+├── workdays.js         — Office-schedule loader (ကြားရက် ↔ အစားထိုး ရုံးတက်ရက်)
+├── workdays.json       — Bridge-day / substitute-working-day pairs
+├── sw.js               — Service Worker (cache-first shell + network-first data)
 ├── manifest.json       — PWA web app manifest
 ├── debug.js            — Node.js script for testing mmcal.js engine
 ├── generate-icon.html  — Browser tool to regenerate the app icon

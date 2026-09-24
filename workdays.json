@@ -1,0 +1,13 @@
+{
+  "_comment": "Myanmar government office schedule — ကြားရက် (bridge holidays) and the Saturdays staff must work instead (အစားထိုး ရုံးတက်ရက်). The app shows substitute working Saturdays in black instead of red, and explains the reason in the day detail.",
+  "_howToAddYear": "Add entries under the year of the BRIDGE day. If the substitute working day falls in the following year, set an explicit \"year\" inside \"workday\". \"name\"/\"nameMM\" are optional — bilingual defaults are used when omitted. Editing this file needs no JS knowledge.",
+
+  "byYear": {
+    "2027": [
+      { "bridge": { "month": 3,  "day": 1  }, "workday": { "month": 3,  "day": 6  } },
+      { "bridge": { "month": 5,  "day": 21 }, "workday": { "month": 5,  "day": 29 } },
+      { "bridge": { "month": 11, "day": 22 }, "workday": { "month": 11, "day": 27 } },
+      { "bridge": { "month": 12, "day": 27 }, "workday": { "month": 1,  "day": 8, "year": 2028 } }
+    ]
+  }
+}

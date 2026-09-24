@@ -6,16 +6,19 @@
 //                  Strategy: Cache-first + silent background revalidation.
 //                  These files change only on deliberate releases.
 //
-//  DATA_CACHE   →  holidays.json
+//  DATA_CACHE   →  holidays.json, workdays.json
 //                  Strategy: Network-first (3 s timeout), cache fallback.
-//                  This file may be updated on the server independently of
+//                  These files may be updated on the server independently of
 //                  the app shell.  When the network returns newer data the
 //                  cache is updated and the app is notified via postMessage.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SHELL_CACHE = 'mmcal-shell-v50';
-const DATA_CACHE  = 'mmcal-data-v1';
+const SHELL_CACHE = 'mmcal-shell-v55';
+const DATA_CACHE  = 'mmcal-data-v2';
+
+// Files served network-first (updatable independently of the app shell)
+const DATA_URLS = ['/holidays.json', '/workdays.json'];
 
 const SHELL_URLS = [
     '/',
@@ -24,6 +27,8 @@ const SHELL_URLS = [
     '/app.js',
     '/mmcal.js',
     '/holidays.js',
+    '/workdays.js',
+    '/workdays.js',
     '/icon.png',
     '/manifest.json'
 ];
@@ -41,10 +46,12 @@ self.addEventListener('install', event => {
             // Seed holidays data cache — best-effort
             caches.open(DATA_CACHE).then(async cache => {
                 try {
-                    const req = new Request('/holidays.json', { cache: 'reload' });
-                    const res = await fetch(req);
-                    if (res && res.status === 200) await cache.put('/holidays.json', res);
-                } catch { /* offline during install — no holidays cache yet, that's OK */ }
+                    for (const file of DATA_URLS) {
+                        const req = new Request(file, { cache: 'reload' });
+                        const res = await fetch(req);
+                        if (res && res.status === 200) await cache.put(file, res);
+                    }
+                } catch { /* offline during install — no data cache yet, that's OK */ }
             })
         ]).then(() => self.skipWaiting())
     );
@@ -76,8 +83,8 @@ self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     if (url.origin !== self.location.origin) return;
 
-    if (url.pathname.endsWith('/holidays.json')) {
-        event.respondWith(holidaysStrategy(event.request));
+    if (DATA_URLS.some(p => url.pathname.endsWith(p))) {
+        event.respondWith(dataStrategy(event.request));
     } else {
         event.respondWith(shellStrategy(event.request));
     }
@@ -97,8 +104,8 @@ async function shellStrategy(request) {
     return cached || networkPromise;
 }
 
-// ── Network-first (3 s timeout) + cache fallback (holidays.json) ──────────────
-async function holidaysStrategy(request) {
+// ── Network-first (3 s timeout) + cache fallback (data files) ────────────────
+async function dataStrategy(request) {
     const cache = await caches.open(DATA_CACHE);
 
     try {
@@ -122,7 +129,7 @@ async function holidaysStrategy(request) {
                     new Response(newText, { headers: { 'Content-Type': 'application/json' } })
                 );
                 const clients = await self.clients.matchAll({ includeUncontrolled: true });
-                clients.forEach(c => c.postMessage({ type: 'HOLIDAYS_UPDATED' }));
+                clients.forEach(c => c.postMessage({ type: 'DATA_UPDATED', file: new URL(request.url).pathname }));
             } else if (oldText === null) {
                 // First time storing — just cache it, no notification needed
                 await cache.put(request,
@@ -139,7 +146,8 @@ async function holidaysStrategy(request) {
     if (cached) return cached;
 
     // Last resort: empty valid JSON so the app doesn't crash
-    return new Response('{"fixed":[],"byYear":{}}',
+    const emptyJson = request.url.endsWith('/workdays.json') ? '{"byYear":{}}' : '{"fixed":[],"byYear":{}}';
+    return new Response(emptyJson,
         { headers: { 'Content-Type': 'application/json' } }
     );
 }

@@ -636,6 +636,144 @@ html[data-view="compact"] .view-compact { display: flex; }
 html[data-view="list"]    .view-list    { display: flex; }
 
 /* ═══════════════════════════════════════════════════════
+   FUN FOR EMPLOYEE — next N-day break (Settings → Features)
+   ═══════════════════════════════════════════════════════ */
+.fun-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 10px 0;
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, rgba(255,149,0,0.16), rgba(255,45,85,0.12));
+    border: 1px solid rgba(255,149,0,0.30);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--glass-glow), var(--shadow-sm);
+    animation: funPop 0.32s cubic-bezier(0.34,1.56,0.64,1);
+    flex-shrink: 0;
+}
+.fun-card[hidden] { display: none; }
+@keyframes funPop {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.fun-card-emoji { font-size: 20px; line-height: 1; flex-shrink: 0; }
+.fun-card-text  { display: flex; flex-direction: column; min-width: 0; }
+.fun-card-title { font-size: 14px; font-weight: 700; color: var(--label-primary); line-height: 1.25; }
+.fun-card-sub   { font-size: 12px; color: var(--label-secondary); line-height: 1.3; }
+
+/* Target break days — highlighted on the grid.
+   :where() keeps specificity at (0,1,0) so .today / .selected still win. */
+:where(.calendar-day.fun-break) .day-number-wrap {
+    box-shadow: 0 0 0 2px var(--ios-orange), 0 0 10px rgba(255,149,0,0.45);
+}
+:where(.compact-day.fun-break) .compact-day-num-wrap {
+    box-shadow: 0 0 0 2px var(--ios-orange), 0 0 8px rgba(255,149,0,0.40);
+}
+
+/* ── Fun popup sheet ──────────────────────────────────── */
+.fun-hero { text-align: center; padding: 4px 16px 18px; }
+.fun-hero-emoji { font-size: 46px; line-height: 1; margin-bottom: 6px; }
+.fun-hero-count { font-size: 26px; font-weight: 700; color: var(--label-primary); line-height: 1.2; }
+.fun-hero-title { font-size: 15px; font-weight: 600; color: var(--ios-orange); margin-top: 2px; }
+.fun-hero-range { font-size: 13px; color: var(--label-secondary); margin-top: 6px; }
+.fun-sheet-block { margin: 0 16px; }
+.fun-footnote {
+    font-size: 12px;
+    color: var(--label-tertiary);
+    text-align: center;
+    padding: 14px 24px 4px;
+    line-height: 1.45;
+}
+
+/* ── Settings: days-off input + display mode segment ──── */
+.fun-days-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.fun-days-input input {
+    width: 58px;
+    height: 31px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--label-primary);
+    background: var(--fill-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-sm);
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.fun-days-input input::-webkit-outer-spin-button,
+.fun-days-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.fun-days-input input:focus {
+    border-color: var(--ios-blue);
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+}
+.fun-days-save {
+    height: 31px;
+    padding: 0 13px;
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--ios-blue);
+    transition: transform 0.16s ease, opacity 0.16s ease;
+}
+.fun-days-save:active { transform: scale(0.93); opacity: 0.85; }
+
+.settings-row-stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+.fun-display-seg { align-self: stretch; }
+.fun-display-seg .theme-seg-btn { flex: 1; }
+
+/* ── Settings: custom title ───────────────────────────── */
+.fun-title-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.fun-title-input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--label-primary);
+    background: var(--fill-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-sm);
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.fun-title-input::placeholder { color: var(--label-tertiary); }
+.fun-title-input:focus {
+    border-color: var(--ios-blue);
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+}
+.fun-title-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.fun-title-hint {
+    font-size: 11px;
+    color: var(--label-tertiary);
+    line-height: 1.35;
+    min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
    MONTH VIEW
    ═══════════════════════════════════════════════════════ */
 .view-month { flex-direction: column; }
@@ -670,7 +808,8 @@ html[data-view="list"]    .view-list    { display: flex; }
     letter-spacing: 0.08em;
     display: block;
 }
-.weekday-header > div:first-child span { color: var(--ios-red); }
+.weekday-header > div:first-child span,
+:where([data-saturday-red="on"]) .weekday-header > div:nth-child(7) span { color: var(--ios-red); }
 .weekday-header .t-mm-full { display: none; }
 @media (min-width: 768px) {
     .weekday-header .t-mm-short { display: none; }
@@ -748,7 +887,8 @@ html[data-view="list"]    .view-list    { display: flex; }
     line-height: 1;
     letter-spacing: -0.2px;
 }
-.calendar-day.sunday .day-number { color: var(--ios-red); }
+.calendar-day.sunday .day-number,
+:where([data-saturday-red="on"]) .calendar-day.saturday:where(:not(.workday)) .day-number { color: var(--ios-red); }
 
 /* ── Today — Liquid Glass Blue ─────────────────────────── */
 .calendar-day.today .day-number-wrap {
@@ -950,7 +1090,10 @@ html[data-view="list"]    .view-list    { display: flex; }
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
-.compact-weekdays span:first-child { color: var(--ios-red); }
+.compact-weekdays span:first-child,
+.compact-weekdays span:nth-child(2),
+:where([data-saturday-red="on"]) .compact-weekdays span:nth-child(13),
+:where([data-saturday-red="on"]) .compact-weekdays span:nth-child(14) { color: var(--ios-red); }
 
 .compact-week-days {
     display: grid;
@@ -1003,7 +1146,8 @@ html[data-view="list"]    .view-list    { display: flex; }
     color: var(--label-primary);
     line-height: 1;
 }
-.compact-day.sunday .compact-day-num { color: var(--ios-red); }
+.compact-day.sunday .compact-day-num,
+:where([data-saturday-red="on"]) .compact-day.saturday:where(:not(.workday)) .compact-day-num { color: var(--ios-red); }
 
 .compact-day.today .compact-day-num-wrap {
     background: var(--ios-blue);
@@ -1136,7 +1280,9 @@ html[data-view="list"]    .view-list    { display: flex; }
 }
 
 .list-day-row.sunday .list-day-weekday,
-.list-day-row.sunday .list-day-num { color: var(--ios-red); }
+.list-day-row.sunday .list-day-num,
+:where([data-saturday-red="on"]) .list-day-row.saturday:where(:not(.workday)) .list-day-weekday,
+:where([data-saturday-red="on"]) .list-day-row.saturday:where(:not(.workday)) .list-day-num { color: var(--ios-red); }
 
 .list-day-row.today .list-day-num-wrap {
     background: var(--ios-blue);
@@ -1215,6 +1361,8 @@ html[data-view="list"]    .view-list    { display: flex; }
 }
 .di-row-sep { border-top: 0.5px solid var(--sep); }
 .di-row-holiday { background: rgba(255,59,48,0.06); }
+.di-row-workday { background: rgba(88,86,214,0.08); }
+.di-row-bridge  { background: rgba(175,82,222,0.07); }
 .di-row-moon    { background: rgba(90,200,250,0.07); }
 .di-row-warn    { background: rgba(255,149,0,0.07); }
 
@@ -1235,6 +1383,8 @@ html[data-view="list"]    .view-list    { display: flex; }
 
 .di-row-holiday-content { flex: 1; }
 .di-row-holiday-name { font-size: 15px; font-weight: 600; color: var(--ios-red); }
+.di-row-workday-name { font-size: 15px; font-weight: 600; color: var(--ios-indigo); }
+.di-row-bridge-name  { font-size: 15px; font-weight: 600; color: var(--ios-purple); }
 .di-row-holiday-desc { font-size: 12px; color: var(--label-secondary); margin-top: 2px; }
 .di-row-holiday-icon { font-size: 18px; }
 
@@ -2209,6 +2359,45 @@ html[data-view="list"]    .view-list    { display: flex; }
     background: var(--ios-indigo);
     border: 1.5px solid var(--bg-primary);
     z-index: 4;
+    pointer-events: none;
+}
+
+/* ── Month view substitute-working-day badge (bottom-right) ─ */
+.cell-workday-badge {
+    position: absolute;
+    bottom: -3px;
+    right: -4px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    font-size: 8px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ios-indigo);
+    border: 1.5px solid var(--bg-primary);
+    z-index: 4;
+    pointer-events: none;
+}
+
+/* ── Compact week strip badge ───────────────────────── */
+.compact-day-num-wrap { position: relative; }
+.compact-workday-badge {
+    position: absolute;
+    bottom: -3px;
+    left: -4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 7px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ios-indigo);
+    border: 1.5px solid var(--bg-primary);
+    z-index: 3;
     pointer-events: none;
 }
 

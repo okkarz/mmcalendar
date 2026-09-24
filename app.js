@@ -2,8 +2,8 @@
 //  Myanmar Calendar — iOS-style App Logic
 // ═══════════════════════════════════════════════════════
 
-const APP_VERSION = '3.0.4';
-const APP_CACHE_VERSION = 'v50'; // matches SHELL_CACHE in sw.js
+const APP_VERSION = '3.4.0';
+const APP_CACHE_VERSION = 'v55'; // matches SHELL_CACHE in sw.js
 
 // ── State ──────────────────────────────────────────────
 let today          = new Date();   // refreshed at midnight
@@ -14,6 +14,13 @@ let currentView    = localStorage.getItem('mm-view')  || 'month';
 let notesEnabled   = localStorage.getItem('mm-notes-enabled')  !== 'false';
 let alarmsEnabled  = localStorage.getItem('mm-alarms-enabled') === 'true'; // default OFF
 let hideEmptyListDays = localStorage.getItem('mm-hide-empty-list') !== 'false';
+let saturdayRed    = localStorage.getItem('mm-saturday-red') !== 'false'; // default ON — Saturday red like Sunday
+let substituteWorkdays = localStorage.getItem('mm-substitute-workdays') !== 'false'; // default ON — follow the official ကြားရက် schedule
+let funEmployee    = localStorage.getItem('mm-fun-employee') === 'true';  // default OFF — playful extra
+let funDays        = Math.min(30, Math.max(1, parseInt(localStorage.getItem('mm-fun-days') || '', 10) || 4));
+let funDisplay     = localStorage.getItem('mm-fun-display') || 'card';    // card | toast | popup
+let funTitleEn     = localStorage.getItem('mm-fun-title-en') || '';      // '' = built-in default
+let funTitleMm     = localStorage.getItem('mm-fun-title-mm') || '';
 let selectedDay    = null;  // { year, month, day }
 let pickerYear     = currentYear;
 let notes          = loadNotes();
@@ -1563,6 +1570,7 @@ function generateDateFavicon() {
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
     await holidaysReady;
+    await workdaysReady;
 
     // Restore lang / theme
     document.documentElement.setAttribute('data-lang', currentLang);
@@ -1572,6 +1580,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     syncThemeSeg();
     syncFeatureSwitches();
+    syncFunSettings();
+    applySaturdayRed();
     syncCustomLegend();
     syncCategoriesSwitch();
     // About section
@@ -1592,6 +1602,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupListeners();
     generateDateFavicon();
     startAlarmChecker();
+    showFunFeature();   // Fun for Employee — card / toast / popup on open
 });
 
 // ── Settings page ───────────────────────────────────────
@@ -1600,6 +1611,7 @@ const MOBILE_HOLIDAYS_MAX = 3; // items shown before "Show all" on mobile
 function openSettings() {
     syncThemeSeg();
     syncFeatureSwitches();
+    syncFunSettings();
     syncCategoriesSwitch();
     renderStorageInfo();
     document.getElementById('settingsOverlay').classList.add('active');
@@ -1890,6 +1902,282 @@ function syncFeatureSwitches() {
         hs.classList.toggle('on', hideEmptyListDays);
         hs.setAttribute('aria-checked', String(hideEmptyListDays));
     }
+    const sr = document.getElementById('saturdayRedSwitch');
+    if (sr) {
+        sr.classList.toggle('on', saturdayRed);
+        sr.setAttribute('aria-checked', String(saturdayRed));
+    }
+    const sw = document.getElementById('substituteWorkdaysSwitch');
+    if (sw) {
+        sw.classList.toggle('on', substituteWorkdays);
+        sw.setAttribute('aria-checked', String(substituteWorkdays));
+    }
+}
+
+// ── Saturday in red (Settings → Appearance) ────────────
+// Sunday is always red.  When enabled, Saturday is styled the
+// same way.  Purely CSS-driven via a root attribute, so toggling
+// it needs no re-render — the .saturday marker class is always
+// present on the cells and the CSS decides whether to paint it.
+function applySaturdayRed() {
+    document.documentElement.setAttribute('data-saturday-red', saturdayRed ? 'on' : 'off');
+}
+
+// ── Substitute working days · အစားထိုး ရုံးတက်ရက် ─────────
+// When the government grants a ကြားရက် (bridge holiday), staff make it
+// up by working a specific Saturday.  Those Saturdays are normal
+// working days, so they are NOT painted red.
+//
+// Gated in JS rather than CSS because the setting also controls the
+// 🏢 badge, which lives in the cell markup — toggling re-renders.
+function isSubstituteWorkday(year, month, day) {
+    return substituteWorkdays ? !!getSubstituteWorkday(year, month, day) : false;
+}
+
+// "၁-၃-၂၀၂၇ (တနင်္လာနေ့)" / "Mon, 1 Mar 2027"
+function formatPairDate(date) {
+    const dow = new Date(date.year, date.month - 1, date.day).getDay();
+    return {
+        en: `${DAY_SHORT_EN[dow]}, ${date.day} ${MONTH_SHORT_EN[date.month-1]} ${date.year}`,
+        mm: `${toMM(date.day)}-${toMM(date.month)}-${toMM(date.year)} (${DAY_MM[dow]}နေ့)`,
+    };
+}
+
+// ── Fun for Employee · ရုံးပိတ်ရက် ရေတွက်ခြင်း ──────────
+// A playful helper: "red day = office closed", so the next real
+// break is the next run of N consecutive red days.
+// isRedDay() mirrors EXACTLY what the calendar paints red, so the
+// count can never disagree with the grid the user is looking at.
+let _funBreakKey   = '';
+let _funBreakCache = null;
+
+function invalidateFunBreak() { _funBreakKey = ''; }
+
+function isRedDay(y, m, d) {
+    const { dow, holidays } = getDayData(y, m, d);
+    if (holidays.length) return true;                 // holiday → always closed
+    if (isSubstituteWorkday(y, m, d)) return false;   // worked Saturday → never closed
+    if (dow === 0) return true;                       // Sunday
+    if (dow === 6) return saturdayRed;                // Saturday (setting)
+    return false;
+}
+
+// First run of >= n consecutive red days, scanning forward from today.
+// The WHOLE run is returned (not just the first n days) so a 7-day request
+// can reveal a 9-day Thingyan break. Bounded to ~13 months so a huge n
+// can never spin forever.
+function findNextBreak(n) {
+    const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const at = i => {
+        const dt = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+        return { y: dt.getFullYear(), m: dt.getMonth() + 1, d: dt.getDate() };
+    };
+    let startIdx = -1, run = 0;
+    for (let i = 0; i <= 400; i++) {
+        const dt = at(i);
+        if (isRedDay(dt.y, dt.m, dt.d)) {
+            if (run === 0) startIdx = i;
+            run++;
+        } else if (run) {
+            if (run >= n) return { start: at(startIdx), end: at(i - 1), daysUntil: startIdx, length: run };
+            run = 0;
+            startIdx = -1;
+        }
+    }
+    if (run >= n) return { start: at(startIdx), end: at(400), daysUntil: startIdx, length: run };
+    return null;
+}
+
+// Memoised — renderDays() asks per cell, so the scan runs at most once.
+function getFunBreak() {
+    if (!funEmployee) return null;
+    const key = [funDays, today.getTime(), saturdayRed, substituteWorkdays].join('|');
+    if (_funBreakKey !== key) {
+        _funBreakCache = findNextBreak(funDays);
+        _funBreakKey = key;
+    }
+    return _funBreakCache;
+}
+
+function isFunBreakDay(y, m, d) {
+    const brk = getFunBreak();
+    if (!brk) return false;
+    const v  = y * 10000 + m * 100 + d;
+    const lo = brk.start.y * 10000 + brk.start.m * 100 + brk.start.d;
+    const hi = brk.end.y   * 10000 + brk.end.m   * 100 + brk.end.d;
+    return v >= lo && v <= hi;
+}
+
+function formatBreakRange(brk) {
+    const s = brk.start, e = brk.end;
+    if (s.y === e.y && s.m === e.m) {
+        return {
+            en: `${s.d}–${e.d} ${MONTH_SHORT_EN[s.m-1]} ${s.y}`,
+            mm: `${toMM(s.d)}–${toMM(e.d)} ${MONTH_SHORT_MM[s.m-1]} ${toMM(s.y)}`,
+        };
+    }
+    return {
+        en: `${s.d} ${MONTH_SHORT_EN[s.m-1]} – ${e.d} ${MONTH_SHORT_EN[e.m-1]} ${e.y}`,
+        mm: `${toMM(s.d)} ${MONTH_SHORT_MM[s.m-1]} – ${toMM(e.d)} ${MONTH_SHORT_MM[e.m-1]} ${toMM(e.y)}`,
+    };
+}
+
+// Title resolution — custom title (with {n} placeholder) or the built-in default.
+// Returns RAW text: the toast renders via textContent, while the card and sheet
+// pass it through escHtml() at their injection points.  Escaping here instead
+// would double-encode ('&' → '&amp;amp;') on the textContent path.
+function resolveFunTitle(custom, isMm, n) {
+    const trimmed = (custom || '').trim();
+    if (!trimmed) return isMm ? `${toMM(n)} ရက် အနားယူရက်` : `${n}-day break`;
+    return trimmed.replace(/\{n\}/gi, isMm ? toMM(n) : String(n));
+}
+
+// Bilingual copy shared by the card, toast and popup
+function funCopy() {
+    if (!funEmployee) return null;
+    const brk = getFunBreak();
+
+    // No run of that length within the scanned window
+    if (!brk) {
+        const titleEn = resolveFunTitle(funTitleEn, false, funDays);
+        const titleMm = resolveFunTitle(funTitleMm, true, funDays);
+        const msgEn = 'No such break in the next year 😅';
+        const msgMm = 'လာမည့်တစ်နှစ်အတွင်း မတွေ့ပါ 😅';
+        return {
+            emoji: '😅', brk: null, titleEn, titleMm,
+            countEn: msgEn, countMm: msgMm, rangeEn: '', rangeMm: '',
+            oneLine: `😅 ${t(`${titleEn} · ${msgEn}`, `${titleMm} · ${msgMm}`)}`,
+        };
+    }
+
+    const range = formatBreakRange(brk);
+    const k = brk.daysUntil;
+    let emoji, countEn, countMm;
+    if (k === 0)      { emoji = '🎉'; countEn = 'Today!';        countMm = 'ဒီနေ့ပဲ!'; }
+    else if (k === 1) { emoji = '🥳'; countEn = 'Tomorrow!';     countMm = 'မနက်ဖန်!'; }
+    else              { emoji = '🎉'; countEn = `${k} days to go`; countMm = `${toMM(k)} ရက် လိုသေးတယ်`; }
+    // Title uses the days ACTUALLY available — a 7-day request can reveal a 9-day Thingyan run.
+    const len = brk.length || funDays;
+    const titleEn = resolveFunTitle(funTitleEn, false, len);
+    const titleMm = resolveFunTitle(funTitleMm, true, len);
+    return {
+        emoji, brk, titleEn, titleMm, countEn, countMm,
+        rangeEn: range.en, rangeMm: range.mm,
+        oneLine: `${emoji} ${t(`${titleEn} · ${countEn} · ${range.en}`, `${titleMm} · ${countMm} · ${range.mm}`)}`,
+    };
+}
+
+// Card is only drawn in 'card' mode — the three modes are exclusive.
+function renderFunCard() {
+    const card = document.getElementById('funCard');
+    if (!card) return;
+    const c = (funEmployee && funDisplay === 'card') ? funCopy() : null;
+    if (!c) { card.hidden = true; card.innerHTML = ''; card._html = ''; return; }
+    const html =
+        `<span class="fun-card-emoji">${c.emoji}</span>` +
+        `<span class="fun-card-text">` +
+            `<span class="fun-card-title">${escHtml(t(c.titleEn, c.titleMm))}</span>` +
+            `<span class="fun-card-sub">${escHtml(t(`${c.countEn} · ${c.rangeEn}`, `${c.countMm} · ${c.rangeMm}`))}</span>` +
+        `</span>`;
+    // Only touch the DOM when something actually changed, so the
+    // entry animation doesn't replay on every renderAll().
+    if (card._html !== html) {
+        card.innerHTML = html;
+        card._html = html;
+    }
+    card.hidden = false;
+}
+
+function renderFunSheet() {
+    const body = document.getElementById('funSheetBody');
+    const c = funCopy();
+    if (!body || !c) return;
+    const rows = c.brk ? `
+        <div class="di-section-block fun-sheet-block">
+            <div class="di-row"><span class="di-row-label">${t('Days to go','လိုသေးသည့်ရက်')}</span><span class="di-row-value">${t(String(c.brk.daysUntil), toMM(c.brk.daysUntil))}</span></div>
+            <div class="di-row di-row-sep"><span class="di-row-label">${t('Break length','အနားယူရက် အရေအတွက်')}</span><span class="di-row-value">${t(String(c.brk.length), toMM(c.brk.length))}</span></div>
+            <div class="di-row di-row-sep"><span class="di-row-label">${t('You asked for','သင်တောင်းသည့်ရက်')}</span><span class="di-row-value">${t(String(funDays), toMM(funDays))}</span></div>
+            <div class="di-row di-row-sep"><span class="di-row-label">${t('Counted as red','အနီရက်အဖြစ် တွက်သည်')}</span><span class="di-row-value">${t('Holidays · Sun' + (saturdayRed ? ' · Sat' : ''), 'ရုံးပိတ် · တနင်္ဂနွေ' + (saturdayRed ? ' · စနေ' : ''))}</span></div>
+        </div>
+        <p class="fun-footnote">${t('The break days are highlighted on the calendar.','အနားယူရက်များကို ပြက္ခဒိန်တွင် မီးမောင်းထိုးပြထားသည်။')}</p>` : '';
+    body.innerHTML = `
+        <div class="fun-hero">
+            <div class="fun-hero-emoji">${c.emoji}</div>
+            <div class="fun-hero-count">${escHtml(t(c.countEn, c.countMm))}</div>
+            <div class="fun-hero-title">${escHtml(t(c.titleEn, c.titleMm))}</div>
+            ${c.rangeEn ? `<div class="fun-hero-range">${escHtml(t(c.rangeEn, c.rangeMm))}</div>` : ''}
+        </div>
+        ${rows}
+    `;
+}
+
+// Run on app open, on mode change, and when the toggle turns on
+function showFunFeature() {
+    renderFunCard();
+    if (!funEmployee) return;
+    const c = funCopy();
+    if (!c) return;
+    if (funDisplay === 'toast') {
+        showToast(c.oneLine, 'info');
+    } else if (funDisplay === 'popup') {
+        renderFunSheet();
+        document.getElementById('funSheet')?.classList.add('active');
+    }
+}
+
+function syncFunSettings() {
+    const sw = document.getElementById('funEmployeeSwitch');
+    if (sw) {
+        sw.classList.toggle('on', funEmployee);
+        sw.setAttribute('aria-checked', String(funEmployee));
+    }
+    for (const id of ['funDaysRow', 'funDisplayRow', 'funTitleRow']) {
+        const row = document.getElementById(id);
+        if (row) row.hidden = !funEmployee;
+    }
+    const inp = document.getElementById('funDaysInput');
+    if (inp) inp.value = String(funDays);
+    // Placeholders show what the default title would be at the current day count
+    const tEn = document.getElementById('funTitleEn');
+    if (tEn) { tEn.value = funTitleEn; tEn.placeholder = `${funDays}-day break`; }
+    const tMm = document.getElementById('funTitleMm');
+    if (tMm) { tMm.value = funTitleMm; tMm.placeholder = `${toMM(funDays)} ရက် အနားယူရက်`; }
+    document.querySelectorAll('.fun-display-seg .theme-seg-btn').forEach(b => {
+        const active = b.dataset.funDisplay === funDisplay;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', String(active));
+    });
+}
+
+function saveFunTitle() {
+    const en = document.getElementById('funTitleEn');
+    const mm = document.getElementById('funTitleMm');
+    if (!en || !mm) return;
+    funTitleEn = en.value.trim();
+    funTitleMm = mm.value.trim();
+    localStorage.setItem('mm-fun-title-en', funTitleEn);
+    localStorage.setItem('mm-fun-title-mm', funTitleMm);
+    syncFunSettings();
+    renderAll();
+    const usingDefault = !funTitleEn && !funTitleMm;
+    showToast(usingDefault
+        ? t('Title reset to default', 'ခေါင်းစဉ် မူလအတိုင်း ပြန်ထားပြီး')
+        : t('Title saved', 'ခေါင်းစဉ် သိမ်းပြီး'), 'success');
+}
+
+function saveFunDays() {
+    const inp = document.getElementById('funDaysInput');
+    if (!inp) return;
+    let v = parseInt(inp.value, 10);
+    if (isNaN(v)) v = 4;
+    v = Math.min(30, Math.max(1, v));
+    inp.value = String(v);
+    funDays = v;
+    localStorage.setItem('mm-fun-days', String(v));
+    invalidateFunBreak();
+    syncFunSettings();   // refresh the title placeholders (they mirror the default)
+    renderAll();
+    showToast(t(`Saved — ${v}-day break`, `သိမ်းပြီး — ${toMM(v)} ရက် အနားယူရက်`), 'success');
 }
 
 // ── Apply view mode ─────────────────────────────────────
@@ -1907,6 +2195,7 @@ function applyView(view, save = true) {
 // ── Master render ───────────────────────────────────────
 function renderAll() {
     updateNavHeader();
+    renderFunCard();
     renderDays(currentYear, currentMonth);
     renderHolidaysList(currentYear, currentMonth);
     renderCompact();
@@ -1962,10 +2251,14 @@ function renderDays(year, month) {
     for (let day = 1; day <= dim; day++) {
         const { mDate, dow, moon, fd, sabbath, yatyaza, pyathada, amye, thamaphyu, holidays } = getDayData(year, month, day);
         const isSelected = selectedDay && selectedDay.year === year && selectedDay.month === month && selectedDay.day === day;
+        const workPairMv = isSubstituteWorkday(year, month, day) ? getSubstituteWorkday(year, month, day) : null;
 
         const cell = document.createElement('div');
         cell.className = 'calendar-day';
         if (dow === 0)          cell.classList.add('sunday');
+        if (dow === 6)          cell.classList.add('saturday');
+        if (workPairMv)         cell.classList.add('workday');
+        if (isFunBreakDay(year, month, day)) cell.classList.add('fun-break');
         if (isToday(year,month,day)) cell.classList.add('today');
         if (isSelected)         cell.classList.add('selected');
         if (holidays.length)    cell.classList.add('holiday');
@@ -2018,7 +2311,10 @@ function renderDays(year, month) {
         const customBadgeMv = customDay
             ? `<span class="cell-customday-badge" title="${escHtml(t(customDay.name, customDay.nameMM))}">${getCustomDayType(customDay.customType).icon}</span>`
             : '';
-        cell.innerHTML = `<div class="day-number-wrap">${moonIco}<span class="day-number">${day}</span>${customBadgeMv}${noteBadgeMv}${alarmBadgeMv}</div><div class="day-dots">${dots}</div><div class="myanmar-day">${toMM(fd)}</div>`;
+        const workBadgeMv = workPairMv
+            ? `<span class="cell-workday-badge" title="${escHtml(t('Substitute working day', 'အစားထိုး ရုံးတက်ရက်'))}">🏢</span>`
+            : '';
+        cell.innerHTML = `<div class="day-number-wrap">${moonIco}<span class="day-number">${day}</span>${customBadgeMv}${workBadgeMv}${noteBadgeMv}${alarmBadgeMv}</div><div class="day-dots">${dots}</div><div class="myanmar-day">${toMM(fd)}</div>`;
 
         cell.addEventListener('click', () => {
             selectedDay = { year, month, day };
@@ -2108,12 +2404,17 @@ function renderCompact() {
         const isTd   = isToday(y, m, dd);
         const isSel  = selectedDay && selectedDay.year === y && selectedDay.month === m && selectedDay.day === dd;
         const isSun  = d.getDay() === 0;
+        const isSat  = d.getDay() === 6;
+        const workPairCv = isSubstituteWorkday(y, m, dd) ? getSubstituteWorkday(y, m, dd) : null;
         const { holidays, moon, sabbath, amye, thamaphyu, fd } = getDayData(y, m, dd);
         const hasDot = holidays.length || moon === 'Full Moon' || sabbath.sabbath || amye || thamaphyu;
 
         const btn = document.createElement('button');
         btn.className = 'compact-day';
         if (isSun)  btn.classList.add('sunday');
+        if (isSat)  btn.classList.add('saturday');
+        if (workPairCv) btn.classList.add('workday');
+        if (isFunBreakDay(y, m, dd)) btn.classList.add('fun-break');
         if (isTd)   btn.classList.add('today');
         if (isSel)  btn.classList.add('selected');
         if (holidays.length) btn.classList.add('holiday');
@@ -2122,7 +2423,8 @@ function renderCompact() {
         const noteIndCv = dayNotesCv.length ? `<span class="compact-note-badge" style="background:${dayNotesCv[0].color}">${dayNotesCv[0].icon}</span>` : '';
         const dayAlarmsCv = getAlarmsForDate(y, m, dd).filter(a => a.enabled);
         const alarmIndCv = dayAlarmsCv.length ? `<span class="compact-alarm-badge">⏰</span>` : '';
-        btn.innerHTML = `<div class="compact-day-num-wrap"><span class="compact-day-num">${dd}</span>${noteIndCv}${alarmIndCv}</div><span class="compact-myanmar-num">${toMM(fd)}</span><span class="compact-day-dot${hasDot ? '' : ' invisible'}"></span>`;
+        const workIndCv = workPairCv ? `<span class="compact-workday-badge" title="${escHtml(t('Substitute working day', 'အစားထိုး ရုံးတက်ရက်'))}">🏢</span>` : '';
+        btn.innerHTML = `<div class="compact-day-num-wrap"><span class="compact-day-num">${dd}</span>${noteIndCv}${alarmIndCv}${workIndCv}</div><span class="compact-myanmar-num">${toMM(fd)}</span><span class="compact-day-dot${hasDot ? '' : ' invisible'}"></span>`;
 
         btn.addEventListener('click', () => {
             // If clicking a different month, navigate
@@ -2186,10 +2488,13 @@ function renderList() {
     for (let day = 1; day <= dim; day++) {
         const { mDate, dow, moon, fd, sabbath, yatyaza, pyathada, amye, thamaphyu, holidays } = getDayData(currentYear, currentMonth, day);
         const isTd = isToday(currentYear, currentMonth, day);
+        const workPairL = isSubstituteWorkday(currentYear, currentMonth, day) ? getSubstituteWorkday(currentYear, currentMonth, day) : null;
 
         const row = document.createElement('div');
         row.className = 'list-day-row';
         if (dow === 0)  row.classList.add('sunday');
+        if (dow === 6)  row.classList.add('saturday');
+        if (workPairL)  row.classList.add('workday');
         if (isTd)       row.classList.add('today');
         if (holidays.length) row.classList.add('holiday');
 
@@ -2233,6 +2538,15 @@ function renderList() {
                 <span class="list-event-name">${escHtml(a.time)}${a.label ? ' — ' + escHtml(a.label) : ''}</span>
             </div>`;
         });
+
+        // Substitute working day — must be visible even when the day is otherwise empty
+        if (workPairL) {
+            const bd = formatPairDate(workPairL.bridge);
+            events += `<div class="list-event">
+                <span class="list-event-dot" style="background:var(--ios-indigo)"></span>
+                <span class="list-event-name list-event-special">🏢 ${t('Substitute working day', 'အစားထိုး ရုံးတက်ရက်')} — ${t(bd.en, bd.mm)}</span>
+            </div>`;
+        }
 
         if (!events) {
             if (hideEmptyListDays) continue; // skip days with no data
@@ -2333,6 +2647,42 @@ function buildDayInfoHtml(year, month, day, data) {
             </div>`;
         });
         html += '</div></div>';
+    }
+
+    // 1b. Office schedule — ကြားရက် (bridge holiday) ↔ အစားထိုး ရုံးတက်ရက်
+    if (substituteWorkdays) {
+        const wdPair = getSubstituteWorkday(year, month, day);
+        const brPair = getBridgeHoliday(year, month, day);
+        if (wdPair || brPair) {
+            html += `<div class="di-section"><p class="di-section-header">${t('Office Schedule','ရုံးတက်/ရုံးပိတ် အစီအစဉ်')}</p><div class="di-section-block">`;
+            if (wdPair) {
+                const bd = formatPairDate(wdPair.bridge);
+                html += `<div class="di-row di-row-workday">
+                    <div class="di-row-holiday-content">
+                        <div class="di-row-workday-name">${t('🏢 Substitute Working Day','🏢 အစားထိုး ရုံးတက်ရက်')}</div>
+                        <div class="di-row-holiday-desc">${t(
+                            `Working day — makes up for the bridge holiday on ${bd.en}`,
+                            `ကြားရက် ${bd.mm} အတွက် အစားထိုး ရုံးတက်ရသည့်ရက် — ရုံးပိတ်ရက် မဟုတ်ပါ`
+                        )}</div>
+                    </div>
+                    <span class="di-row-holiday-icon">🏢</span>
+                </div>`;
+            }
+            if (brPair) {
+                const wd = formatPairDate(brPair.workday);
+                html += `<div class="di-row${wdPair ? ' di-row-sep' : ''} di-row-bridge">
+                    <div class="di-row-holiday-content">
+                        <div class="di-row-bridge-name">${t('🟣 Bridge Holiday','🟣 ကြားရက်')}</div>
+                        <div class="di-row-holiday-desc">${t(
+                            `Compensated by a substitute working Saturday on ${wd.en}`,
+                            `အစားထိုး ရုံးတက်ရမည့်ရက် — ${wd.mm}`
+                        )}</div>
+                    </div>
+                    <span class="di-row-holiday-icon">🟣</span>
+                </div>`;
+            }
+            html += '</div></div>';
+        }
     }
 
     // 2. Myanmar date
@@ -2501,6 +2851,59 @@ function setupListeners() {
         syncFeatureSwitches();
         renderList();
     });
+    const saturdayRedSwitch = document.getElementById('saturdayRedSwitch');
+    if (saturdayRedSwitch) saturdayRedSwitch.addEventListener('click', () => {
+        saturdayRed = !saturdayRed;
+        localStorage.setItem('mm-saturday-red', String(saturdayRed));
+        applySaturdayRed();
+        syncFeatureSwitches();
+    });
+    const substituteWorkdaysSwitch = document.getElementById('substituteWorkdaysSwitch');
+    if (substituteWorkdaysSwitch) substituteWorkdaysSwitch.addEventListener('click', () => {
+        substituteWorkdays = !substituteWorkdays;
+        localStorage.setItem('mm-substitute-workdays', String(substituteWorkdays));
+        syncFeatureSwitches();
+        invalidateFunBreak();
+        renderAll();   // the marker class + badge live in the cell markup
+    });
+
+    // Fun for Employee (Settings → Features)
+    const funEmployeeSwitch = document.getElementById('funEmployeeSwitch');
+    if (funEmployeeSwitch) funEmployeeSwitch.addEventListener('click', () => {
+        funEmployee = !funEmployee;
+        localStorage.setItem('mm-fun-employee', String(funEmployee));
+        invalidateFunBreak();
+        syncFunSettings();
+        renderAll();
+        showFunFeature();
+    });
+    const funDaysSave = document.getElementById('funDaysSave');
+    if (funDaysSave) funDaysSave.addEventListener('click', saveFunDays);
+    const funDaysInput = document.getElementById('funDaysInput');
+    if (funDaysInput) funDaysInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); saveFunDays(); }
+    });
+    const funTitleSave = document.getElementById('funTitleSave');
+    if (funTitleSave) funTitleSave.addEventListener('click', saveFunTitle);
+    ['funTitleEn', 'funTitleMm'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); saveFunTitle(); }
+        });
+    });
+    document.querySelectorAll('.fun-display-seg .theme-seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            funDisplay = btn.dataset.funDisplay;
+            localStorage.setItem('mm-fun-display', funDisplay);
+            syncFunSettings();
+            showFunFeature();   // immediate preview of the chosen mode
+        });
+    });
+
+    const funSheetClose = document.getElementById('funSheetClose');
+    if (funSheetClose) funSheetClose.addEventListener('click', () => {
+        document.getElementById('funSheet').classList.remove('active');
+    });
 
     // Settings open / close
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -2542,7 +2945,7 @@ function setupListeners() {
     const holidaySheetClose = document.getElementById('holidaySheetClose');
     if (holidaySheetClose) holidaySheetClose.addEventListener('click', closeHolidaySheet);
     // Close sheets on overlay tap
-    ['catSheet','holidaySheet','analyticsSheet','storageSheet','aboutSheet'].forEach(id => {
+    ['catSheet','holidaySheet','analyticsSheet','storageSheet','aboutSheet','funSheet'].forEach(id => {
         const ov = document.getElementById(id);
         if (ov) ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('active'); });
     });
@@ -2839,13 +3242,14 @@ function setupListeners() {
 
     window.addEventListener('online', async () => {
         _setOfflineBanner(false);
-        // Back online — ask the SW to refresh holidays.json from the network.
-        // reloadHolidays() fetches through the SW (network-first), so if the
-        // server has new data the SW will update DATA_CACHE before returning.
-        const changed = await reloadHolidays();
-        if (changed) {
+        // Back online — ask the SW to refresh the data files from the network.
+        // These fetches go through the SW (network-first), so if the server has
+        // new data the SW updates DATA_CACHE before returning.
+        const [holidaysChanged, scheduleChanged] = await Promise.all([reloadHolidays(), reloadWorkdays()]);
+        if (holidaysChanged || scheduleChanged) {
+            invalidateFunBreak();
             renderAll();
-            showToast(t('Holidays updated', 'ရုံးပိတ်ရက်ဒေတာ အပ်ဒိတ်ပြီး'), 'info');
+            showToast(t('Data updated', 'ဒေတာ အပ်ဒိတ်ပြီး'), 'info');
         }
     });
 
@@ -2853,17 +3257,18 @@ function setupListeners() {
         _setOfflineBanner(true);
     });
 
-    // ── SW message: holidays.json was updated while the app was open ─────────
+    // ── SW message: a data file was updated while the app was open ──────────
     // The SW's network-first handler sends this when a background fetch detects
     // changed server data (e.g. the page was loaded while online and the server
-    // had newer holidays since the last visit).
+    // had newer data since the last visit).
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('message', async event => {
-            if (event.data?.type === 'HOLIDAYS_UPDATED') {
-                const changed = await reloadHolidays();
-                if (changed) {
+            if (event.data?.type === 'DATA_UPDATED') {
+                const [holidaysChanged, scheduleChanged] = await Promise.all([reloadHolidays(), reloadWorkdays()]);
+                if (holidaysChanged || scheduleChanged) {
+                    invalidateFunBreak();
                     renderAll();
-                    showToast(t('Holidays updated', 'ရုံးပိတ်ရက်ဒေတာ အပ်ဒိတ်ပြီး'), 'info');
+                    showToast(t('Data updated', 'ဒေတာ အပ်ဒိတ်ပြီး'), 'info');
                 }
             }
         });

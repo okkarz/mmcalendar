@@ -120,6 +120,9 @@
     <!-- ── Main Content ── -->
     <main class="main-content">
 
+        <!-- Fun for Employee — next N-day break (Settings → Features) -->
+        <div class="fun-card" id="funCard" hidden aria-live="polite"></div>
+
         <!-- Month View -->
         <section class="view-panel view-month" id="viewMonth" role="tabpanel">
             <div class="month-grid-col">
@@ -255,6 +258,24 @@
                             </button>
                         </div>
                     </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <svg class="settings-row-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" style="fill: var(--ios-red)"/></svg>
+                            <span class="t-en">Saturday in Red</span><span class="t-mm">စနေနေ့ အနီရောင်</span>
+                        </span>
+                        <button class="switch" id="saturdayRedSwitch" role="switch" aria-checked="true" aria-label="Saturday in red">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="settings-row-icon">🏢</span>
+                            <span class="t-en">Substitute Working Days</span><span class="t-mm">အစားထိုး ရုံးတက်ရက်</span>
+                        </span>
+                        <button class="switch" id="substituteWorkdaysSwitch" role="switch" aria-checked="true" aria-label="Substitute working days">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="settings-group">
@@ -281,6 +302,55 @@
                         <button class="switch" id="alarmsSwitch" role="switch" aria-checked="true" aria-label="Alarms">
                             <span class="switch-thumb"></span>
                         </button>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">
+                            <span class="t-en">🎉 Fun for Employee</span><span class="t-mm">🎉 ပျော်ရွှင်စရာ (ဝန်ထမ်းများအတွက်)</span>
+                        </span>
+                        <button class="switch" id="funEmployeeSwitch" role="switch" aria-checked="false" aria-label="Fun for employee">
+                            <span class="switch-thumb"></span>
+                        </button>
+                    </div>
+                    <div class="settings-row" id="funDaysRow" hidden>
+                        <span class="settings-row-label">
+                            <span class="settings-row-icon">🎯</span>
+                            <span class="t-en">Days off needed</span><span class="t-mm">လိုချင်သည့် အနားယူရက်</span>
+                        </span>
+                        <span class="fun-days-input">
+                            <input type="number" id="funDaysInput" min="1" max="30" step="1" inputmode="numeric" value="4" aria-label="Days off needed">
+                            <button class="fun-days-save" id="funDaysSave" type="button"><span class="t-en">Save</span><span class="t-mm">သိမ်း</span></button>
+                        </span>
+                    </div>
+                    <div class="settings-row settings-row-stack" id="funDisplayRow" hidden>
+                        <span class="settings-row-label">
+                            <span class="settings-row-icon">👀</span>
+                            <span class="t-en">Show as</span><span class="t-mm">ပြသပုံ</span>
+                        </span>
+                        <div class="theme-seg fun-display-seg" role="radiogroup" aria-label="Show as">
+                            <button class="theme-seg-btn" data-fun-display="card" aria-pressed="false">
+                                <span class="t-en">Card</span><span class="t-mm">ကတ်</span>
+                            </button>
+                            <button class="theme-seg-btn" data-fun-display="toast" aria-pressed="false">
+                                <span class="t-en">Toast</span><span class="t-mm">အချက်ပြ</span>
+                            </button>
+                            <button class="theme-seg-btn" data-fun-display="popup" aria-pressed="false">
+                                <span class="t-en">Popup</span><span class="t-mm">ပေါ့ပ်</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="settings-row settings-row-stack" id="funTitleRow" hidden>
+                        <span class="settings-row-label">
+                            <span class="settings-row-icon">✏️</span>
+                            <span class="t-en">Title</span><span class="t-mm">ခေါင်းစဉ်</span>
+                        </span>
+                        <div class="fun-title-fields">
+                            <input type="text" class="fun-title-input" id="funTitleEn" maxlength="60" aria-label="Custom title (English)">
+                            <input type="text" class="fun-title-input" id="funTitleMm" maxlength="60" aria-label="Custom title (Myanmar)">
+                        </div>
+                        <div class="fun-title-actions">
+                            <span class="fun-title-hint"><span class="t-en">Use {n} for the day count · empty = default</span><span class="t-mm">ရက်အရေအတွက်အတွက် {n} သုံးပါ · ဗလာထားလျှင် မူလအတိုင်း</span></span>
+                            <button class="fun-days-save" id="funTitleSave" type="button"><span class="t-en">Save</span><span class="t-mm">သိမ်း</span></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -492,6 +562,20 @@
             </div>
             <div class="analytics-body" id="analyticsBody"></div>
         </div>
+    </div>
+</div>
+
+<!-- Fun for Employee Sheet (popup display mode) -->
+<div class="sheet-overlay sheet-over-top" id="funSheet" role="dialog" aria-modal="true" aria-labelledby="funSheetTitle">
+    <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+            <button id="funSheetClose" class="sheet-close-btn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <span class="sheet-title" id="funSheetTitle"><span class="t-en">🎉 Fun for Employee</span><span class="t-mm">🎉 ပျော်ရွှင်စရာ</span></span>
+        </div>
+        <div class="sheet-body" id="funSheetBody"></div>
     </div>
 </div>
 
@@ -795,6 +879,7 @@
 
 <script src="mmcal.js"></script>
 <script src="holidays.js"></script>
+<script src="workdays.js"></script>
 <script src="app.js"></script>
 <script>
     if ('serviceWorker' in navigator) {
